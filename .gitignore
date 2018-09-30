@@ -1,0 +1,9 @@
+# pycharm, feel free to add your IDE specific folders
+.idea/
+
+# generic python
+__pycache__/
+*.py[cod]
+
+# project specific
+*.csv

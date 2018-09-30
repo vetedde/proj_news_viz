@@ -6,7 +6,6 @@ import gzip
 import os
 import datetime
 
-
 limit = 100
 PID = '1'
 FILE_NAME = 'files_to_download.txt'
@@ -19,22 +18,22 @@ SAVED_FILES = set()
 
 
 async def fetch(url, session):
-    UrlHashName = hashlib.md5(url.encode()).hexdigest()
-    if UrlHashName not in SAVED_FILES and os.path.exists(ARTICLES_FOLDER + UrlHashName) == False:
+    urlhashname = hashlib.md5(url.encode()).hexdigest()
+    if urlhashname not in SAVED_FILES and os.path.exists(ARTICLES_FOLDER + urlhashname) is False:
         status = 'success_200'
         try:
             async with session.get(url) as response:
                 body = await response.read()
-                UrlHashName = hashlib.md5(url.encode()).hexdigest()
-                with gzip.open(ARTICLES_FOLDER + UrlHashName + '.html.gz', 'w') as file:
+                urlhashname = hashlib.md5(url.encode()).hexdigest()
+                with gzip.open(ARTICLES_FOLDER + urlhashname + '.html.gz', 'w') as file:
                     file.write(body)
-                SAVED_FILES.add(UrlHashName)
+                SAVED_FILES.add(urlhashname)
                 await asyncio.sleep(1)
-        except:
+        except Exception:
             status = 'error' + str(response.status)
-            UrlHashName = 'None'
+            urlhashname = 'None'
 
-        LogFile.write('{};{};{};{}{}'.format(url, status, UrlHashName, ARTICLES_FOLDER, '\n'))
+        LogFile.write('{};{};{};{}{}'.format(url, status, urlhashname, ARTICLES_FOLDER, '\n'))
 
 
 async def _main(urls):
@@ -56,7 +55,7 @@ async def addurls():
                 urls = file.readlines()
             urls = [line.rstrip() for line in urls]
             loop.create_task(_main(urls))
-        except:
+        except Exception:
             pass
         await asyncio.sleep(60)
         await addurls()
@@ -71,7 +70,7 @@ def main():
     with open(LOG_FOLDER + CURRENT_DATE + '/' + CURRENT_TIME + '_' + PID + '.csv', 'w') as LogFile:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(addurls())
-        #loop.run_forever()
+        # loop.run_forever()
 
 
 if __name__ == "__main__":

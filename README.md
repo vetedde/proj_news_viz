@@ -11,6 +11,8 @@
 │       └── lists      # download_urls.txt , processed_urls.txt , ...
 ├── README.md
 └── scrapping          # скрипты для скраппинга
+└── nlp                # скрипты и тетрадки по nlp
+│   ├── topic_models   # тематическое моделирование
 ```
 
 ## Requirements

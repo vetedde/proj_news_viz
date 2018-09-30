@@ -29,7 +29,7 @@ async def fetch(url, session):
                     file.write(body)
                 SAVED_FILES.add(urlhashname)
                 await asyncio.sleep(1)
-        except Exception:
+        except:
             status = 'error' + str(response.status)
             urlhashname = 'None'
 
@@ -55,13 +55,12 @@ async def addurls():
                 urls = file.readlines()
             urls = [line.rstrip() for line in urls]
             loop.create_task(_main(urls))
-        except Exception:
+        except:
             pass
         await asyncio.sleep(60)
-        await addurls()
 
 
-def main():
+if __name__ == "__main__":
     CURRENT_DATE = str(datetime.date.today())  # текущая дата для создания папки с логом
     if not os.path.exists(LOG_FOLDER + CURRENT_DATE):  # создаем папку с текущей датой для записи файла лога
         os.makedirs(LOG_FOLDER + CURRENT_DATE)
@@ -71,7 +70,3 @@ def main():
         loop = asyncio.get_event_loop()
         loop.run_until_complete(addurls())
         # loop.run_forever()
-
-
-if __name__ == "__main__":
-    main()

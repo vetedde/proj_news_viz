@@ -35,4 +35,7 @@ Python 3.6+
 
 ## Contributions
 
+- Andrey @Erlemar
+- Vladimir @LanSaid
+
 Здесь могло быть ваше имя.

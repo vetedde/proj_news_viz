@@ -96,7 +96,7 @@ def format_topics_sentences(ldamodel, corpus, texts):
     """
     sent_topics_df = pd.DataFrame()
     # Словарь с топиками и топ-словами для них.
-    words_per_topic = {j : [i[0] for i in ldamodel.show_topic(j)] for j in range(ldamodel.num_topics)}
+    words_per_topic = {j: [i[0] for i in ldamodel.show_topic(j)] for j in range(ldamodel.num_topics)}
 
     for i, row in enumerate(ldamodel[corpus]):
 
@@ -105,7 +105,8 @@ def format_topics_sentences(ldamodel, corpus, texts):
         # Номер топика и его доля
         topic_num, prop_topic = row_topics[0]
         topic_keywords = ', '.join([word for word in words_per_topic[topic_num] if word in texts[i]])
-        sent_topics_df = sent_topics_df.append(pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]), ignore_index=True)
+        sent_topics_df = sent_topics_df.append(pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]),
+                                               ignore_index=True)
 
     sent_topics_df.columns = ['Dominant_Topic', 'Perc_Contribution', 'Topic_Keywords']
 

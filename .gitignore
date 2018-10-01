@@ -7,3 +7,7 @@ __pycache__/
 
 # project specific
 *.csv
+*.gz
+
+#ipynb
+.ipynb_checkpoints/

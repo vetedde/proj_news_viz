@@ -1,0 +1,5 @@
+bleach==2.1.4
+html5lib==1.0.1
+lmdb==0.94
+six==1.11.0
+webencodings==0.5.1

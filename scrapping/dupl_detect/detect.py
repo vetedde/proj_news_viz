@@ -24,14 +24,26 @@ def put(file_path):
     hash_dict = utils.get_hash_dict(file_path, chunks)
 
     env = lmdb.open(db_path)
-    duplicates = []
+    duplicates = {}
+    intersection_count = 0
+    chunks_count = len(chunks)
     with env.begin(write=True) as thx:
         for key, value in hash_dict.items():
             dt = thx.get(key.encode())
-            if dt:
-                duplicates.append(dt.decode())
-            else:
+            if not dt:
                 thx.put(key.encode(), value.encode())
+                continue
 
-    intersection = round(len(duplicates) / len(chunks), 2)
-    return {'intersection': intersection, 'files': duplicates}
+            intersection_count += 1
+            fname = dt.decode()
+            if fname in duplicates:
+                duplicates[fname] += 1
+            else:
+                duplicates[fname] = 1
+
+    max_intersection = round(intersection_count / chunks_count, 2)
+
+    files_intersect = {k: round(v / chunks_count, 2)
+                       for (k, v) in duplicates.items()}
+
+    return {'max_intersection': max_intersection, 'files': files_intersect}

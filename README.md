@@ -38,5 +38,5 @@ Python 3.6+
 - Andrey @Erlemar
 - Vladimir @LanSaid
 - Pavel @p-kachalov
-
+- Andrey Malakhov @andreymalakhov
 Здесь могло быть ваше имя.

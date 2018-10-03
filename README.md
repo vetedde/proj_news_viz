@@ -17,7 +17,7 @@
 
 ## Requirements
 
-Python 3.5+
+Python 3.6+
 
 
 ## Порядок работы
@@ -34,5 +34,9 @@ Python 3.5+
 
 
 ## Contributions
+
+- Andrey @Erlemar
+- Vladimir @LanSaid
+- Pavel @p-kachalov
 
 Здесь могло быть ваше имя.

@@ -1,10 +1,12 @@
 # coding: utf-8
 import re
 from gensim.models.ldamodel import LdaModel
+
 from gensim.models import CoherenceModel, LdaMulticore
 import pandas as pd
 import warnings
 import time
+
 warnings.filterwarnings("ignore")
 
 
@@ -63,6 +65,7 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3, 
     use_multicore : bool
         Использовать LdaMulticore или нет
 
+
     Returns:
     -------
     model_list : []
@@ -79,6 +82,7 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3, 
                                  workers=5)
         else:
             model = LdaModel(corpus, num_topics=num_topics, id2word=dictionary, passes=10, per_word_topics=True)
+
         model_list.append(model)
         coherencemodel = CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
         coherence_values.append(coherencemodel.get_coherence())

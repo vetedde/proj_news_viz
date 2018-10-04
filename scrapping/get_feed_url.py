@@ -7,6 +7,10 @@ import traceback
 from bs4 import BeautifulSoup
 
 # Create a csv table with source name|URL|feed url
+SOURCE_FILE_NAME = 'sourses.csv'
+FEED_FILE_NAME = 'feeds.csv'
+CONF_FOLDER = 'data/parser/conf'
+
 
 FEED_LINKS_ATTRIBUTES = (
     (('type', 'application/rss+xml'),),
@@ -26,6 +30,25 @@ FEED_LINKS_ATTRIBUTES = (
 )
 
 
+def get_sources_url(conf_folder=CONF_FOLDER, source_file_name=SOURCE_FILE_NAME):
+    """
+    Read a CSV file using csv.reader
+    """
+    if os.path.exists(conf_folder) is True:
+        try:
+            with open(conf_folder + source_file_name, encoding='utf-8') as sources:
+                reader = csv.reader(sources)
+                next(reader)  # skip header
+                data = [r for r in reader]
+                return data
+        except Exception as err:
+            print('Oops. File is invalid ', err)
+            traceback.print_exc()
+    else:
+        print("ERROR: Folder is invalid")
+        return []
+
+
 def extract_feed_links(html, url, feed_links_attributes=FEED_LINKS_ATTRIBUTES):
     for attrs in feed_links_attributes:
         try:
@@ -40,9 +63,11 @@ def extract_feed_links(html, url, feed_links_attributes=FEED_LINKS_ATTRIBUTES):
             traceback.print_exc()
 
 
-def get_rss_feed(sites):
+def get_rss_feed(data):
     feeds_list = []
-    for site in sites:
+    for row in data:
+        name = row[0]
+        site = row[1]
         if site is None:
             print('The URL should not be null!')
             continue
@@ -58,13 +83,12 @@ def get_rss_feed(sites):
                     link = '://' + link
                 feed = feedparser.parse(link)
                 if not feed.get("bozo", 1):
-                    feed = {"name": site, "URL": site, "feed_url": link}
+                    feed = {"name": name, "URL": site, "feed_url": link}
                     feeds_list.append(feed)
     try:
-        with open('feed.csv', 'w') as file:
+        with open(CONF_FOLDER + FEED_FILE_NAME, 'w') as file:
             writer = csv.DictWriter(file,
-                                    fieldnames=["name", "URL", "feed_url"],
-                                    delimiter=';')
+                                    fieldnames=["name", "URL", "feed_url"])
             writer.writeheader()
             for row in feeds_list:
                 writer.writerow(row)
@@ -72,11 +96,8 @@ def get_rss_feed(sites):
     except Exception as err:
         print('Oops. file is occured ', err)
         traceback.print_exc()
-        pass
 
 
 if __name__ == "__main__":
-    url = ['https://ria.ru/', 'https://www.vesti.ru/news/',
-           'meduza.io', 'https://russian.rt.com', 'https://www.axios.com/',
-           'https://www.zerohedge.com/', 'http://lenta.ch/news']
-    get_rss_feed(url)
+    data = get_sources_url()
+    get_rss_feed(data)

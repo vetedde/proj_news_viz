@@ -40,3 +40,15 @@ Python 3.6+
 - Pavel @p-kachalov
 
 Здесь могло быть ваше имя.
+
+## Make things work
+
+ - [ ] входной файл для `scrapping/get_feed_url.py` (видимо `data/parser/lists/sources.txt`)
+ - [ ] проверить, что `scrapping/get_feed_url.py` выдает файл нужного формата (`name;URL;feed_url`) `data/parser/lists/feeds.csv`
+ - [ ] написать `rss-downloader`, из файла `data/parser/lists/feeds.csv` писать в файл ссылки на новости `/data/parser/lists/files_to_download.txt`
+ - [ ] убедиться, что `scrapping/downloader/main.py` качает файлы (`hash.html.gz`) в `data/downloaded/date/`
+ - [ ] (*) написать `crawling-parser`, который достает из скачанных файлов ссылки и дописывает их в файл для `downloader`а.
+ - [ ] написать `article-parser`, который из файлов извлекает новости `{url, filename, title, text, collected_date}`
+ - [ ] дедупликатор
+ 
+ (*) ссылки для `downloader` докидывают и rss-downloader и crawling-parser, может быть race-condition с потерей ссылок от второго процесса, надо проверить.

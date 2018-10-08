@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "proj_news_viz"
+version = "0.1.0"
+description = ""
+authors = [""]
+
+[tool.poetry.dependencies]
+python = "*"
+ipython = "^7.0"
+numpy = "^1.15"
+readability-lxml = "^0.7.0"
+lmdb = "^0.94.0"
+aiohttp = "^3.4"
+
+[tool.poetry.dev-dependencies]

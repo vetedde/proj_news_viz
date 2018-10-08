@@ -11,5 +11,7 @@ numpy = "^1.15"
 readability-lxml = "^0.7.0"
 lmdb = "^0.94.0"
 aiohttp = "^3.4"
+requests = "^2.19"
+feedparser = "^5.2"
 
 [tool.poetry.dev-dependencies]

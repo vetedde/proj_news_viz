@@ -1,0 +1,49 @@
+name,URL,feed_url
+Знак,http://znak.com,https://www.znak.com/rss
+Лента,http://lenta.ru,https://lenta.ru/rss
+РБК,http://www.rbc.ru/,http://static.feed.rbc.ru/rbc/logical/footer/news.rss
+Вести.Ру,http://www.vesti.ru/news/,http://www.vesti.ru/vesti.rss
+Вести.Ру,https://www.vesti.ru/news/,https://www.vesti.ru/vesti.rss
+Russia Today,http://russian.rt.com,https://russian.rt.com/rss
+Лайф,http://life.ru/,https://life.ru/xml/feed.xml
+ТАСС,http://tass.ru/,http://tass.ru/rss/v2.xml
+Известия,http://iz.ru,https://iz.ru/xml/rss/all.xml
+Аргументы и Факты,http://aif.ru,http://www.aif.ru/rss/all.php
+Медуза,http://meduza.io,https://meduza.io/rss/all
+Медуза,http://meduza.io,https://meduza.io/rss/news
+Медуза,http://meduza.io,https://meduza.io/rss/fun
+ТВ Звезда,http://tvzvezda.ru,http://tvzvezda.ru/export/rss.xml
+НТВ,http://ntv.ru,https://www.ntv.ru/exp/newsrss.jsp
+НТВ,http://ntv.ru,https://www.ntv.ru/exp/schedulerss.jsp
+НТВ,http://ntv.ru,https://www.ntv.ru/exp/moviesrss.jsp
+НТВ,http://ntv.ru,https://www.ntv.ru/exp/soaprss.jsp
+StarHit,http://www.starhit.ru/,http://www.starhit.ru/rss/
+Дождь,http://tvrain.ru,https://tvrain.ru/export/rss/all.xml
+Дождь,http://tvrain.ru,https://rss.simplecast.com/podcasts/7121/rss
+Интерфакс,http://www.interfax.ru/,https://www.interfax.ru/rss.asp
+Свобода,http://svoboda.org,https://www.svoboda.org/api/
+Свобода,http://svoboda.org,https://www.svoboda.org/sitemap.xml
+Maxim,http://maximonline.ru,https://www.maximonline.ru/main.rss
+Maxim,http://maximonline.ru,https://www.maximonline.ru/photo.rss
+Дни ру,http://dni.ru,https://dni.ru/rss.xml
+Независимая газета,http://ng.ru,http://www.ng.ru/rss/
+Эксперт,http://expert.ru/,http://expert.ru/doc-list/rss/
+Эксперт,https://expert.ru/,https://expert.ru/doc-list/rss/
+Форбс Россия,http://www.forbes.ru/,http://www.forbes.ru/newrss.xml
+Аргументы недели,http://argumenti.ru,http://www.argumenti.ru/rss/argumenti_online.xml
+Новые известия,http://newizv.ru,https://newizv.ru/rss
+Elle,http://elle.ru,https://www.elle.ru/rss/elle_ru/rss.xml
+Голос Америки,http://golos-ameriki.ru,https://www.golos-ameriki.ru/api/
+Голос Америки,http://golos-ameriki.ru,https://www.golos-ameriki.ru/sitemap.xml
+Psychologies,http://psychologies.ru,http://www.psychologies.ru/news/rss/
+National Geographic,http://nat-geo.ru,https://www.nat-geo.ru/out/public-all-articles.xml
+Моя планета,http://moya-planeta.ru,"https://www.moya-planeta.ru/agregator/?format=rss_full&modules=countries,travel,news,reports,clubnews"
+Republic,http://republic.ru/,https://republic.ru/export/all.xml
+Republic,http://republic.ru/,https://republic.ru/export/articles.xml
+Republic,http://republic.ru/,https://republic.ru/export/news.xml
+Медиазона,http://zona.media,https://zona.media/rss
+The New Times,http://newtimes.ru,https://newtimes.ru/rss/
+Профиль,http://profile.ru,http://www.profile.ru/?format=feed&type=rss
+Русский репортер,http://rusrep.ru,http://expert.ru/russian_reporter/rss/
+Русский репортер,https://rusrep.ru,https://expert.ru/russian_reporter/rss/
+Axios,http://www.axios.com/,https://api.axios.com/feed/top/

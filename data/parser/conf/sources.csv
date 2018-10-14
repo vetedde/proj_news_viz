@@ -23,7 +23,7 @@ Russia Today	russian.rt.com		ru	31 000	7	604	66
 Ura.ru	ura.news		ru	17 000	5	5 491	251
 Cosmopolitan	cosmo.ru		ru	16 000	5	3 226	225
 НТВ	ntv.ru		ru	16 000	6	3 839	281
-StarHit	www.starhit.ru/		ru	16 000	5	5 300	331
+StarHit	http://www.starhit.ru/		ru	16 000	5	5 300	331
 Фонтанка	fontanka.ru		ru	15 000	6	7 115	416
 BBC Russia	www.bbc.com/russian		ru	14 000	7	102	83
 7 Дней	7days.ru		ru	14 000	5	3 820	277
@@ -34,25 +34,25 @@ BBC Russia	www.bbc.com/russian		ru	14 000	7	102	83
 Свобода	svoboda.org		ru	12 000	5	4 898	737
 Maxim	maximonline.ru		ru	12 000	5	6 940	513
 Дни ру	dni.ru		ru	12 000	6	7 736	1009
-Независимая газета	ng.ru		ru	10 000	6	15 405	1289
+Независимая газета	http://ng.ru		ru	10 000	6	15 405	1289
 Эксперт	expert.ru/		ru	9 700	6	18 693	1939
 Форбс Россия	www.forbes.ru/		ru	9 000	6	12 260	972
-Аргументы недели	argumenti.ru		ru	8 700	6	13 600	839
+Аргументы недели	http://argumenti.ru		ru	8 700	6	13 600	839
 Сноб	snob.ru		ru	8 400	6	9 208	1046
 Новые известия	newizv.ru		ru	7 900	6	17 519	941
 Elle	elle.ru		ru	7 400	5	10 994	845
 Домашний очаг	goodhouse.ru		ru	7 000	5	9 087	787
-Завтра	zavtra.ru		ru	6 400	5	23 496	1579
+Завтра	http://zavtra.ru		ru	6 400	5	23 496	1579
 EuroNews	ru.euronews.com		ru	6 200	8	2 275	366
 Россия К	tvkultura.ru		ru	5 900	6	15 092	1614
 Голос Америки	golos-ameriki.ru		ru	5 600	5	20 286	3636
-Psychologies	psychologies.ru		ru	5 500	5	11 766	990
+Psychologies	http://psychologies.ru		ru	5 500	5	11 766	990
 ТВ Центр	tvc.ru		ru	5 300	6	24 697	2398
-HELLO!	ru.hellomagazine.com		ru	5 100	6	612	32
+HELLO!	http://ru.hellomagazine.com		ru	5 100	6	612	32
 Reuters	ru.reuters.com/		ru	4 800	7	605	294
 National Geographic	nat-geo.ru		ru	4 500	5	23 439	1841
 Моя планета	moya-planeta.ru		ru	4 100	5	27 137	2139
-Вокруг света	vokrugsveta.ru		ru	4 000	5	16 868	860
+Вокруг света	http://vokrugsveta.ru		ru	4 000	5	16 868	860
 GQ Russia	gq.ru		ru	4 000	5	27 055	2497
 Republic	republic.ru/		ru	3 700	5	40 050	5643
 Медиазона	zona.media		ru	3 500	5	32 501	2861
@@ -66,9 +66,6 @@ The New Times	newtimes.ru		ru	1 500	6	113 588	14257
 Профиль	profile.ru		ru	750	5	320 458	31463
 5 канал	5-tv.ru		ru	700	5	7 613	452
 Русский репортер	rusrep.ru		ru	400	5	481 366	54558
-Лентач	lenta.ch/news		ru	350	2	574 599	51921
-Итоги	itogi.ru		ru	140	5	822 225	110607
-Время Новостей	vremya.ru		ru	30	5	704 751	7081
-
-ZeroHedge	www.zerohedge.com/		en	3 500	7	1 674		542
-Axios	www.axios.com/		en	190	6	4 688		907
+Лентач	http://lenta.ch/news		ru	350	2	574 599	51921
+Итоги	http://itogi.ru		ru	140	5	822 225	110607
+Время Новостей	http://vremya.ru		ru	30	5	704 751	7081

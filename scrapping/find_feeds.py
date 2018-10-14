@@ -1,16 +1,14 @@
-﻿import os
-import bs4
-import requests
 import csv
-import feedparser
 import traceback
-from bs4 import BeautifulSoup
 import urllib.parse
+
+import feedparser
+from bs4 import BeautifulSoup
+from .store import Downloader
 
 # Create a csv table with source name|URL|feed url
 SOURCES = 'data/parser/conf/sources.csv'
 FEEDS = 'data/parser/conf/feeds.csv'
-
 
 FEED_LINKS_ATTRIBUTES = (
     {'type': 'application/rss+xml'},
@@ -29,9 +27,9 @@ FEED_LINKS_ATTRIBUTES = (
     {'rel': 'alternate', 'type': 'application/xml'},
 )
 
-def extract_feed_links(html, base_url):
+
+def extract_feed_links(base_url, html):
     soup = BeautifulSoup(html, 'lxml')
-    head = soup.find('head')
     for attrs in FEED_LINKS_ATTRIBUTES:
         try:
             for link in soup.findAll('link', attrs):
@@ -49,14 +47,16 @@ def extract_feed_links(html, base_url):
 def get_sites():
     with open(SOURCES, encoding='utf-8') as sources:
         reader = csv.reader(sources, delimiter='\t')
-        data = [r for r in reader if len(r)>=2 and r[1:2] != ['Ссылка']]
+        data = list(reader)
 
     print(f"Found {len(data)} sites.")
 
-    for row in data:
+    for row in data[1:]:
+        if len(row) < 2:
+            continue
         name = row[0]
         site = row[1]
-        if not '.' in site:
+        if '.' not in site:
             print(f"Skipping bad site: {site}")
             continue
         if '://' in site:
@@ -65,15 +65,16 @@ def get_sites():
             yield name, 'http://' + site
             yield name, 'https://' + site
 
-if __name__ == "__main__":
+
+def main():
     feeds = []
     links = set()
+    d = Downloader(None)
     for name, site in get_sites():
         print(f"Fetching RSS for {name} at {site}")
         try:
-            response = requests.get(site, timeout=30)
-            url = response.url
-            for link in extract_feed_links(response.text, url):
+            base_url, body = d.download_url(site)
+            for link in extract_feed_links(base_url, body):
                 if link in links:
                     continue
                 links.add(link)
@@ -84,7 +85,7 @@ if __name__ == "__main__":
                     feeds.append((name, site, link))
         except Exception as e:
             print(f"Error: {e}")
-            #traceback.print_exc()
+            # traceback.print_exc()
 
     with open(FEEDS, 'w', newline='') as f:
         writer = csv.writer(f)  # ["name", "URL", "feed_url"]
@@ -92,3 +93,7 @@ if __name__ == "__main__":
         for row in feeds:
             writer.writerow(row)
     print(f"Found {len(feeds)} feeds.")
+
+
+if __name__ == "__main__":
+    main()

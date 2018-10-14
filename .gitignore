@@ -1,5 +1,6 @@
 # pycharm, feel free to add your IDE specific folders
 .idea/
+.vscode/
 
 # generic python
 __pycache__/
@@ -11,3 +12,7 @@ __pycache__/
 
 #ipynb
 .ipynb_checkpoints/
+
+.venv/
+
+/data

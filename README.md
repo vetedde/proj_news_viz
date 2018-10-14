@@ -39,4 +39,11 @@ Python 3.6+
 - Vladimir @LanSaid
 - Pavel @p-kachalov
 - Andrey Malakhov @andreymalakhov
+- Yuri Baburov @buriy
 Здесь могло быть ваше имя.
+
+## Скрипты:
+
+- scrapping/downloader.py : скачивает страницы из списков, находящихся в data/parser/lists/*.txt
+- scrapping/find_feeds.py : заходит на сайты, находит все RSS на них и сохраняет в data/parser/conf/feeds.csv
+- scrapping/find_news.py : проходит по списку RSS и главных страниц и сохраняет все найденные ссылки

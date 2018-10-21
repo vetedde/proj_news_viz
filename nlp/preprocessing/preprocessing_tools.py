@@ -48,7 +48,6 @@ def token_stop_pymorph(text):
             try:
                 if not w[1:] in stopword_ru:
                     if w[1:] in cache:
-                        print('enter')
                         words_lem.append(cache[w[1:]])
                     else:
                         temp_cach = cache[w[1:]] = morph.parse(w[1:])[

@@ -49,6 +49,10 @@ class Downloader:
             assert 200 <= response.status_code < 299
             return response.url, response.text
 
+    def exists(self, url: str, cache_time: int):
+        fpath = build_path(url, 'html.gz')
+        return self.store.exists(fpath, cache_time)
+
     def load_url(self, url: str, cache_time: int):
         fpath = build_path(url, 'html.gz')
         if not self.store.exists(fpath, cache_time):

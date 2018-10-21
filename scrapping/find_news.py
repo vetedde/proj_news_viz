@@ -4,15 +4,17 @@ import time
 
 import feedparser
 
-from .html_parser import get_html_links
+from .parse_news import get_html_links
 from .store import Store, Downloader
 
 FEEDS = 'data/parser/conf/feeds.csv'
 SOURCES = 'data/parser/conf/sources.csv'
-DOWNLOAD_ROOT = 'data/parser/cache'
+DOWNLOAD_ROOT = 'data/parser/articles'
 SAVE_PATH = 'data/parser/lists/feed_urls.txt'
 
-CACHE_TIME = 60 * 60
+FEED_CACHE_TIME = 60 * 5
+PAGE_CACHE_TIME = 60 * 10
+
 
 def csv2string(rows):
     si = io.StringIO()
@@ -32,7 +34,9 @@ class FeedLoader:
             items = [row for row in csv.reader(f)]
 
         for name, base_url, feed_url in items[1:]:
-            body = self.downloader.load_url(feed_url, CACHE_TIME)
+            if self.downloader.exists(feed_url, FEED_CACHE_TIME):
+                continue
+            body = self.downloader.load_url(feed_url, FEED_CACHE_TIME)
             print("Parsing feed", feed_url)
             feed = feedparser.parse(body)
             for f in feed.entries:
@@ -64,8 +68,10 @@ class FeedLoader:
                 urls = ['http://' + url, 'https://' + url]
 
             for url in urls:
+                if self.downloader.exists(url, PAGE_CACHE_TIME):
+                    continue
                 try:
-                    base_url, body = self.downloader.load_url(url, CACHE_TIME)
+                    base_url, body = self.downloader.load_url(url, PAGE_CACHE_TIME)
                 except Exception as e:
                     print(f"Error downloading page {url}: {e}")
                     continue

@@ -2,13 +2,14 @@ import re
 import os
 import json
 from datetime import datetime
-from rtkn_dev.ods.proj_news_viz.scrapping.validator.topic import process_topic
+from proj_news_viz.scrapping.validator.topic import process_topic
 
 SOURCE_DIR = "./test_webhose"
 DEST_DIR = "./sources/webh"
 FILE_HEADER = 'datetime,url,section,topic,title,text\n'
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 DATE_REGEXP = "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+ALLOWED_METHODS = ['file', 'dir']
 
 
 def datestring_to_date(datestring: str, date_format: str) -> datetime:
@@ -24,24 +25,39 @@ def datestring_to_date(datestring: str, date_format: str) -> datetime:
     )
 
 
-def source_to_csv(source_file: str, dest_dir: str, encoding='utf8') -> None:
+def source_to_csv(source_file: str, dest_dir: str, encoding='utf8', save_method='file') -> None:
     """
     Creates file structure from source files
     :param source_file: path to source file
     :param dest_dir: the path to dir where to store resulted files
     :param encoding: files encoding
+    :param save_method: defines how to store the data
     :return:
     """
+    assert save_method in ALLOWED_METHODS, "Choose on of the following methods {}".format(ALLOWED_METHODS)
     file_content = json.load(open(source_file, encoding=encoding))
     file_date = datestring_to_date(
         re.search(DATE_REGEXP, file_content['published']).group(),
         DATE_FORMAT
     )
-    target_file = "{desc_dir}/{date}-{source}.csv".format(
-        desc_dir=dest_dir,
-        date=file_date.strftime("%Y-%m"),
-        source=file_content['thread']['site']
-    )
+    if save_method == 'file':
+        target_file = "{dest_dir}/{date}-{source}.csv".format(
+            dest_dir=dest_dir,
+            date=file_date.strftime("%Y-%m"),
+            source=file_content['thread']['site']
+        )
+    elif save_method == 'dir':
+        target_dir = "{dest_dir}/{year}/{month}".format(
+                dest_dir=dest_dir,
+                year=file_date.strftime("%Y"),
+                month=file_date.strftime("%-m")
+        )
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        target_file = "{target_dir}/{source}.csv".format(
+            target_dir=target_dir,
+            source=file_content['thread']['site']
+        )
     payload = {
         "datetime": str(int(file_date.timestamp())),
         "url": file_content['url'],

@@ -40,29 +40,18 @@ def token_stop_pymorph(text):
     на выходе лист токенов
     '''
 
+    if not isinstance(text, str):
+        text = str(text)
     words = word_tokenize(text)
 
     words_lem = []
     for w in words:
         if w[0] == '-':
-            try:
-                if not w[1:] in stopword_ru:
-                    if w[1:] in cache:
-                        words_lem.append(cache[w[1:]])
-                    else:
-                        temp_cach = cache[w[1:]] = morph.parse(w[1:])[
-                            0].normal_form
-                        words_lem.append(temp_cach)
-            except:
-                pass
-        else:
-            try:
-                if not w in stopword_ru:
-                    if w in cache:
-                        words_lem.append(cache[w])
-                    else:
-                        temp_cach = cache[w] = morph.parse(w)[0].normal_form
-                        words_lem.append(temp_cach)
-            except:
-                pass
+            w = w[1:]
+        if not w in stopword_ru:
+            if w in cache:
+                words_lem.append(cache[w])
+            else:
+                temp_cach = cache[w] = morph.parse(w)[0].normal_form
+                words_lem.append(temp_cach)
     return words_lem

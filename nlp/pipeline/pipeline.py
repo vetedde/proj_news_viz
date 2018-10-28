@@ -15,7 +15,7 @@ class TopicModeller(object):
     def __init__(self, file_name: str):
         self.data = pd.read_csv(file_name)
 
-    def process(self, clean : bool = True, normalize : bool = True, get_date : bool = True):
+    def process(self, clean : bool = True, normalize : bool = True, get_date : bool = True, lemma: str = 'nltk'):
         """
         Cleaning and normalizing.
         :param clean:
@@ -32,7 +32,7 @@ class TopicModeller(object):
 #
         if normalize:
             print('Normalizing')
-            normalizer = Normalizer(lemma='nltk')
+            normalizer = Normalizer(lemma=lemma)
             #normalized_text = normalizer.normalize(list(self.data['cleaned_text'].values), return_tokenized=True)
             #self.data.loc[:, 'tokenized_text'] = normalized_text
             self.data.loc[:, 'tokenized_text'] = self.data['text'].apply(

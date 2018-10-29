@@ -1,16 +1,16 @@
 import re
 
 
-def valid_topic(raw_topic: str) -> str:
+def is_valid_topic(raw_topic: str) -> str:
     """
-    Validates topic by the several rules
+    Validates topic by several rules
     :param raw_topic: raw topic string
-    :return: a validated topic or '' if the validation process didn't pass
+    :return: a validated topic or '' if the topic is invalid
     """
-    whitespaces = len(re.findall(r"(\s|-|_)", raw_topic)) if re.search(r"(\s|-|_)", raw_topic) else 0
-    low_case = len(re.findall(r"[a-z]", raw_topic)) if re.search(r"[a-z]", raw_topic) else 0
-    upper_case = len(re.findall(r"[A-Z]", raw_topic)) if re.search(r"[A-Z]", raw_topic) else 0
-    numbers = len(re.findall(r"\d", raw_topic)) if re.search(r"\d", raw_topic) else 0
+    whitespaces = len(re.findall(r"(\s|-|_)", raw_topic))
+    low_case = len(re.findall(r"[a-z]", raw_topic))
+    upper_case = len(re.findall(r"[A-Z]", raw_topic))
+    numbers = len(re.findall(r"\d", raw_topic))
     if upper_case > whitespaces and low_case != 0:
         return ''
     elif low_case == 0 and upper_case == 0:
@@ -35,6 +35,6 @@ def process_topic(url: str) -> str:
     """
     topic = re.sub(r"(https://|http://)", '', url).split("/")[1]
     if re.search('[a-zA-Z]', topic) and not re.search(r'(\?|=)', topic):
-        return valid_topic(topic)
+        return is_valid_topic(topic)
     else:
         return ''

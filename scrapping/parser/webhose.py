@@ -2,7 +2,7 @@ import re
 import os
 import json
 from datetime import datetime
-from proj_news_viz.scrapping.validator.topic import process_topic
+from .scrapping.validator.topic import process_topic
 
 SOURCE_DIR = "./test_webhose"
 DEST_DIR = "./sources/webh"

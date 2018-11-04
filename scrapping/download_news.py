@@ -16,6 +16,7 @@ from scrapping.store import Store, build_path
 
 def get_hostname(url):
     host = urlparse(url).hostname or ''  # .rstrip(':80').rstrip(':443')
+    return host
     if host.count('.') > 1:
         parts = host.split('.')
         if parts[-2] == 'co':  # e.g. www.site.co.uk
@@ -92,13 +93,13 @@ class Host:
         self.uar = self.ua.random
         self.queue = []
         self.lock = asyncio.Lock()
-        self.downloaded = set()
+        self.urls = set()
+        self.downloads = 0
 
     async def fetch_url(self, entry: Entry, session: ClientSession):
         fpath = build_path(entry.url, 'html.gz')
         if self.store.exists(fpath, self.PAGE_CACHE_TIME):
             # print("Already downloaded", entry)
-            self.downloaded.add(entry.url)
             return True
         # print("Downloading", entry)
         try:
@@ -111,18 +112,19 @@ class Host:
 
             self.store.save(fpath, payload)
             self.logger.log(entry, fpath, True)
-            self.downloaded.add(fpath_base)
 
             if base_url != entry.url:
                 # XXX: If the crawler was redirected to a new URL, save it under both old URL and new URL
                 fpath_base = build_path(base_url, 'html.gz')
                 if not self.store.exists(fpath_base, self.PAGE_CACHE_TIME):
                     self.store.save(fpath_base, payload)
-                    self.downloaded.add(fpath_base)
+                    self.urls.add(fpath_base)
+            self.downloads += 1
 
             return True
-        except Exception:
-            # traceback.print_exc()
+        except Exception as e:
+            print(f"Downloading {entry.url} and got exception {type(e)}: {str(e)}")
+            #import traceback; traceback.print_exc()
             self.logger.log(entry, fpath, False)
             return False
 
@@ -134,19 +136,32 @@ class Host:
                     entry = queue.pop(0)
                     success = await self.fetch_url(entry, session)
                     if not success:
-                        if entry.attempts < 3:
+                        if entry.attempts < 2:
                             entry.attempts += 1
+                            print(f"Failed to download {entry.attempts} times: {entry.url}")
                             queue.append(entry)
                         else:
+                            #save empty doc
+                            print(f"Failed to download 3 times: {entry.url}")
                             self.store.save(build_path(entry.url, 'html.gz'), entry.url.encode('utf-8') + b'\n')
+                    else:
+                        pass 
+                        # print(f"Download has finished: {entry.url}")
                     await asyncio.sleep(self.HOST_SLEEP_TIME)
 
     def enqueue(self, entry: Entry):
-        if entry.url in self.downloaded or entry.url in self.queue:
+        fn = entry.url.split('/')[-1]
+        if '.' in fn:
+            ext = fn.split('.')[-1].lower()
+            if ext in ['jpg', 'jpeg', 'png', 'gif', 'ico', 'mp3', 'wmv', 'wma', 'mp4', 'webp', 'flv', 'css', 'js']:
+                return False
+
+        if entry.url in self.urls:
             return False
 
-        if self.store.exists(build_path(entry.url, 'html.gz')):
-            self.downloaded.add(entry.url)
+        self.urls.add(entry.url)
+
+        if self.store.exists(build_path(entry.url, 'html.gz'), self.PAGE_CACHE_TIME):
             return False
 
         self.queue.append(entry)
@@ -186,11 +201,17 @@ class AsyncDownloader:
     def total_size(self):
         count = 0
         for h in self.hosts.values():
-            count += len(h.downloaded)
+            count += len(h.urls)
+        return count
+
+    def downloads(self):
+        count = 0
+        for h in self.hosts.values():
+            count += h.downloads
         return count
 
     def exists(self, entry):
-        return self.store.exists(build_path(entry.url, 'html.gz'))
+        return self.store.exists(build_path(entry.url, 'html.gz'), PAGE_CACHE_TIME)
 
 
 async def watch_file(path, downloader, interval):
@@ -213,12 +234,13 @@ async def watch_file(path, downloader, interval):
                 new_entries += int(downloader.enqueue(entry))
             print(f"Found {entries}, added {new_entries} new entries from {fn}")
             total_added += new_entries
-            if total_added >= 20000:
+            if total_added >= 5000:
                 break
         tc = downloader.task_count()
         qs = downloader.queue_size()
+        ds = downloader.downloads()
         ts = downloader.total_size()
-        print(f"Downloading from {tc} hosts, queue size: {qs}, already downloaded: {ts}")
+        print(f"Downloading from {tc} hosts, queue size: {qs}, downloaded: {ds}, total: {ts}")
         await asyncio.sleep(interval)
 
 

@@ -6,7 +6,7 @@ from nltk.corpus import stopwords
 # morph = pymorphy2.MorphAnalyzer()
 
 
-def clean_text(text, russian_words_only: bool, remove_stop: bool = True):
+def clean_text(text, russian_words_only: bool = False, remove_stop: bool = True):
 
     text = text.lower()
     if russian_words_only:
@@ -32,6 +32,6 @@ def remove_stopwords(text):
     stopword_ru.append('это')
     stopword_ru.append('по')
 
-    text = [w for w in text if w not in stopword_ru]
+    text = [w for w in text.split() if w not in stopword_ru]
 
     return text

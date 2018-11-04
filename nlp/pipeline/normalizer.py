@@ -11,9 +11,11 @@ class Normalizer(object):
         self.lemma = lemma
         self.cache = {}
 
-    def normalize(self, text : list, simple_tokenize: bool = True, return_tokenized: bool = False):
+    def normalize(self, text : list, simple_tokenize: bool = False, return_tokenized: bool = False):
         if simple_tokenize:
             words = text.split()
+        else:
+            words = text
 
         if self.lemma == 'nltk':
             lemmatizer = WordNetLemmatizer()

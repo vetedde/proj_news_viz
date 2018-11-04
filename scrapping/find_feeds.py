@@ -4,6 +4,7 @@ import urllib.parse
 
 import feedparser
 from bs4 import BeautifulSoup
+
 from .store import Downloader
 
 # Create a csv table with source name|URL|feed url

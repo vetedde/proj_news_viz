@@ -26,7 +26,6 @@ StarHit,http://www.starhit.ru/,http://www.starhit.ru/rss/
 Maxim,http://maximonline.ru,https://www.maximonline.ru/main.rss
 Maxim,http://maximonline.ru,https://www.maximonline.ru/photo.rss
 Дни ру,http://dni.ru,https://dni.ru/rss.xml
-Независимая газета,http://ng.ru,http://www.ng.ru/rss/
 Эксперт,http://expert.ru/,http://expert.ru/doc-list/rss/
 Эксперт,https://expert.ru/,https://expert.ru/doc-list/rss/
 Форбс Россия,http://www.forbes.ru/,http://www.forbes.ru/newrss.xml
@@ -39,8 +38,6 @@ Psychologies,http://psychologies.ru,http://www.psychologies.ru/news/rss/
 National Geographic,http://nat-geo.ru,https://www.nat-geo.ru/out/public-all-articles.xml
 Моя планета,http://moya-planeta.ru,"https://www.moya-planeta.ru/agregator/?format=rss_full&modules=countries,travel,news,reports,clubnews"
 Republic,http://republic.ru/,https://republic.ru/export/all.xml
-Republic,http://republic.ru/,https://republic.ru/export/articles.xml
-Republic,http://republic.ru/,https://republic.ru/export/news.xml
 Медиазона,http://zona.media,https://zona.media/rss
 The New Times,http://newtimes.ru,https://newtimes.ru/rss/
 Профиль,http://profile.ru,http://www.profile.ru/?format=feed&type=rss

@@ -41,12 +41,13 @@ class Downloader:
     def __init__(self, store):
         self.store = store
         self.ua = UserAgent()
+        self.uar = self.ua.random
 
     def download_url(self, url: str):
         print("Downloading", url)
-        headers = {'User-Agent': self.ua.random}
+        headers = {'User-Agent': self.uar}
         with requests.get(url, headers=headers, timeout=30) as response:
-            assert 200 <= response.status_code < 299
+            assert 200 <= response.status_code < 300, "Status code: {}".format(response.status_code)
             return response.url, response.text
 
     def exists(self, url: str, cache_time: int):

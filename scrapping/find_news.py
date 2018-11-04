@@ -1,6 +1,9 @@
 import csv
+import datetime
 import io
+import os
 import time
+from pathlib import Path
 
 import feedparser
 
@@ -10,7 +13,7 @@ from .store import Store, Downloader
 FEEDS = 'data/parser/conf/feeds.csv'
 SOURCES = 'data/parser/conf/sources.csv'
 DOWNLOAD_ROOT = 'data/parser/articles'
-SAVE_PATH = 'data/parser/lists/feed_urls.txt'
+LISTS = Path('data/parser/lists/')
 
 FEED_CACHE_TIME = 60 * 5
 PAGE_CACHE_TIME = 60 * 10
@@ -22,6 +25,11 @@ def csv2string(rows):
     for row in rows:
         cw.writerow(row)
     return si.getvalue().strip('\r\n').encode('utf-8')
+
+
+def build_dpid():
+    dt = str(datetime.datetime.utcnow())
+    return "{}/{}-{}".format(dt[:10], dt[11:19].replace(':', '_'), os.getpid())
 
 
 class FeedLoader:
@@ -38,7 +46,11 @@ class FeedLoader:
                 continue
             body = self.downloader.load_url(feed_url, FEED_CACHE_TIME)
             print("Parsing feed", feed_url)
-            feed = feedparser.parse(body)
+            try:
+                feed = feedparser.parse(body)
+            except Exception:
+                print(f"Error downloading page {url}: {e}")
+                continue
             for f in feed.entries:
                 url = f.get('link', '')
                 if not url or url in self.urls:
@@ -82,8 +94,11 @@ class FeedLoader:
     def process(self):
         self.load_feeds()
         self.load_main_pages()
-        with open(SAVE_PATH, 'w') as f:
-            f.write('\n'.join(sorted(self.urls)))
+        if self.urls:
+            dpid = build_dpid().replace('/', '-')
+            with open(LISTS / f'feeds-{dpid}.txt', 'w') as f:
+                f.write('\n'.join(sorted(self.urls)))
+            print(f"Saved as feeds-{dpid}.txt")
 
 
 if __name__ == '__main__':

@@ -1,23 +1,20 @@
 import csv
-import datetime
 import io
-import os
 import time
 from pathlib import Path
 
 import feedparser
 
 from .parse_news import get_html_links
-from .store import Store, Downloader
+from .store import Downloader, PageStore, is_same_site, FileStore, build_dpid, RobotsParser
 
 FEEDS = 'data/parser/conf/feeds.csv'
 SOURCES = 'data/parser/conf/sources.csv'
 DOWNLOAD_ROOT = 'data/parser/articles'
 LISTS = Path('data/parser/lists/')
 
-FEED_CACHE_TIME = 60 * 5
-PAGE_CACHE_TIME = 60 * 10
-
+CACHE_TIME = 60 * 10
+TEST_MODE = False
 
 def csv2string(rows):
     si = io.StringIO()
@@ -27,80 +24,99 @@ def csv2string(rows):
     return si.getvalue().strip('\r\n').encode('utf-8')
 
 
-def build_dpid():
-    dt = str(datetime.datetime.utcnow())
-    return "{}/{}-{}".format(dt[:10], dt[11:19].replace(':', '_'), os.getpid())
+def load_feeds(downloader: Downloader):
+    urls = set()
+    with open(FEEDS, 'r') as f:
+        items = [row for row in csv.reader(f)]
 
-
-class FeedLoader:
-    def __init__(self, downloader):
-        self.urls = set()
-        self.downloader = downloader
-
-    def load_feeds(self):
-        with open(FEEDS, 'r') as f:
-            items = [row for row in csv.reader(f)]
-
-        for name, base_url, feed_url in items[1:]:
-            if self.downloader.exists(feed_url, FEED_CACHE_TIME):
-                continue
-            body = self.downloader.load_url(feed_url, FEED_CACHE_TIME)
+    for name, site_url, feed_url in items[1:]:
+        if not TEST_MODE and downloader.exists(feed_url):
+            continue
+        try:
+            body = downloader.load_page(feed_url)
             print("Parsing feed", feed_url)
+        except Exception as e:
+            print(f"Error downloading page {feed_url}: {e}")
+            downloader.page_store.save_empty_page(feed_url)
+            continue
+
+        try:
+            feed = feedparser.parse(body)
+        except Exception as e:
+            print(f"Error parsing page {feed_url}: {e}")
+            continue
+
+        for f in feed.entries:
+            url = f.get('link', '')
+            if not url or url in urls or not is_same_site(url, site_url):
+                continue
+            urls.add(url)
+            pub = time.strftime('%Y-%m-%dT%H:%M:%S', f.published_parsed)
+            meta = csv2string({
+                'url': url,
+                'title': f.get('title', ''),
+                'summary': f.get('summary', ''),
+                'published': pub,
+                'feed_url': feed_url
+            })
+            downloader.page_store.save_url(url, meta, 'meta')
+    return urls
+
+
+def load_main_pages(downloader: Downloader):
+    urls = set()
+    with open(SOURCES, 'r') as f:
+        items = [row for row in csv.reader(f, delimiter='\t')]
+
+    for row in items[1:]:
+        if len(row) < 2:
+            continue
+        site_url = row[1]
+        if '://' in site_url:
+            site_urls = [site_url]
+        else:
+            site_urls = ['http://' + site_url, 'https://' + site_url]
+
+        for site_url in site_urls:
+            if not TEST_MODE and downloader.exists(site_url):
+                continue
             try:
-                feed = feedparser.parse(body)
-            except Exception:
-                print(f"Error downloading page {url}: {e}")
+                base_url, body = downloader.load_page(site_url)
+            except Exception as e:
+                downloader.page_store.save_empty_page(site_url)
+                print(f"Error downloading {site_url}: {e}")
+                import traceback
+                traceback.print_exc()
                 continue
-            for f in feed.entries:
-                url = f.get('link', '')
-                if not url or url in self.urls:
-                    continue
-                self.urls.add(url)
-                pub = time.strftime('%Y-%m-%dT%H:%M:%S', f.published_parsed)
-                meta = csv2string({
-                    'url': url,
-                    'title': f.get('title', ''),
-                    'summary': f.get('summary', ''),
-                    'published': pub,
-                    'feed_url': feed_url
-                })
-                self.downloader.save_extra(url, 'meta', meta)
+            print("Parsing page", site_url)
+            for found_url in get_html_links(base_url, body):
+                urls.add(found_url)
+    return urls
 
-    def load_main_pages(self):
-        with open(SOURCES, 'r') as f:
-            items = [row for row in csv.reader(f, delimiter='\t')]
 
-        for row in items[1:]:
-            if len(row) < 2:
-                continue
-            url = row[1]
-            if '://' in url:
-                urls = [url]
-            else:
-                urls = ['http://' + url, 'https://' + url]
+def main():
+    file_store = FileStore(DOWNLOAD_ROOT)
+    robots = RobotsParser(PageStore(file_store, 86400))  # one day
+    downloader = Downloader(PageStore(file_store, CACHE_TIME))
 
-            for url in urls:
-                if self.downloader.exists(url, PAGE_CACHE_TIME):
-                    continue
-                try:
-                    base_url, body = self.downloader.load_url(url, PAGE_CACHE_TIME)
-                except Exception as e:
-                    print(f"Error downloading page {url}: {e}")
-                    continue
-                print("Parsing page", url)
-                for found_url in get_html_links(base_url, body):
-                    self.urls.add(found_url)
+    urls = load_feeds(downloader)
 
-    def process(self):
-        self.load_feeds()
-        self.load_main_pages()
-        if self.urls:
-            dpid = build_dpid().replace('/', '-')
-            with open(LISTS / f'feeds-{dpid}.txt', 'w') as f:
-                f.write('\n'.join(sorted(self.urls)))
-            print(f"Saved as feeds-{dpid}.txt")
+    for url in sorted(load_main_pages(downloader)):
+        if not robots.can_fetch(url):
+            print(f"Skipping {url}, forbidden by robots.txt")
+        urls.add(url)
+
+    if urls:
+        dt, tm = build_dpid().split('-', 1)
+        fn = f'{dt}/feeds-{tm}.txt'
+        path = LISTS / fn
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(LISTS / fn, 'w') as f:
+            f.write('\n'.join(sorted(urls)))
+        print(f"Saved as {fn}")
+    else:
+        print("No urls.")
 
 
 if __name__ == '__main__':
-    fl = FeedLoader(Downloader(Store(DOWNLOAD_ROOT)))
-    fl.process()
+    main()

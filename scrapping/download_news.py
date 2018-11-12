@@ -1,29 +1,18 @@
 import argparse
 import asyncio
 import csv
-import datetime
-import os
-import pathlib
 import random
 import time
-from urllib.parse import urlparse, urldefrag
+from collections import Counter
+from pathlib import Path
+from urllib.parse import urldefrag
 
 from aiohttp import web, ClientSession
 from fake_useragent import UserAgent
 
-from scrapping.store import Store, build_path
+from scrapping.store import PageStore, FileStore, get_hostname, Page, RobotsParser, build_dpid
 
-
-def get_hostname(url):
-    host = urlparse(url).hostname or ''  # .rstrip(':80').rstrip(':443')
-    return host
-    if host.count('.') > 1:
-        parts = host.split('.')
-        if parts[-2] == 'co':  # e.g. www.site.co.uk
-            host = '.'.join(parts[-3:])
-        else:
-            host = '.'.join(parts[-2:])
-    return host
+PAGE_CACHE_TIME = 86400 * 365 * 100  # 100 years
 
 
 class Entry:
@@ -43,11 +32,6 @@ class Entry:
         return f"<Entry: {self.url}, errors: {self.attempts}>"
 
 
-def build_dpid():
-    dt = str(datetime.datetime.utcnow())
-    return "{}/{}-{}".format(dt[:10], dt[11:19].replace(':', '_'), os.getpid())
-
-
 def load_from_file(fpath: str):
     with open(fpath, 'r') as fin:
         urls = [line.strip() for line in fin]
@@ -58,7 +42,7 @@ class Logger:
     ROTATION_TIME = 900
 
     def __init__(self, log_root):
-        self.log_root = pathlib.Path(log_root)
+        self.log_root = Path(log_root)
         self.log_root.mkdir(parents=True, exist_ok=True)
         self.log_file = None
         self.log_started = time.time()
@@ -66,24 +50,25 @@ class Logger:
     def rotate_log(self):
         if self.log_file:
             self.log_file.close()
-        log_fpath = self.log_root / build_dpid()
+        log_fpath = self.log_root / build_dpid().replace('-', '/', 1)
         log_fpath.parent.mkdir(parents=True, exist_ok=True)
         self.log_file = open(str(log_fpath) + '.csv', 'w', newline='')
 
-    def log(self, entry: Entry, fpath: str, success: bool):
+    def log(self, entry: Entry, status: str):
         if self.log_file is None or time.time() > self.log_started + self.ROTATION_TIME:
             self.rotate_log()
-        status = 'OK' if success else 'Error'
-        # fieldnames=["source", "URL", "status", "attempts", "fpath"])
+        # fieldnames=["URL", "status"])
         log_csv = csv.writer(self.log_file)
-        log_csv.writerow((entry.source, entry.url, status, entry.attempts, fpath))
+        log_csv.writerow((entry.url, status))
         del log_csv
         self.log_file.flush()
 
 
+BAD_EXT = frozenset(['jpg', 'jpeg', 'png', 'gif', 'ico', 'mp3', 'wmv', 'wma', 'mp4', 'webp', 'flv', 'css', 'js'])
+
+
 class Host:
     HOST_SLEEP_TIME = 1
-    PAGE_CACHE_TIME = 86400 * 90  # 90 days
 
     def __init__(self, store, logger, host):
         self.host = host
@@ -94,39 +79,28 @@ class Host:
         self.queue = []
         self.lock = asyncio.Lock()
         self.urls = set()
-        self.downloads = 0
+        self.downloaded = 0
+        self.robots = RobotsParser(store)
 
     async def fetch_url(self, entry: Entry, session: ClientSession):
-        fpath = build_path(entry.url, 'html.gz')
-        if self.store.exists(fpath, self.PAGE_CACHE_TIME):
-            # print("Already downloaded", entry)
-            return True
-        # print("Downloading", entry)
+        if self.store.exists(entry.url):
+            return 'exists'
         try:
+            if not self.robots.can_fetch(entry.url):
+                entry.attempts = 2
+                return 'forbidden'
             headers = {'User-Agent': self.uar}
             async with session.get(entry.url, headers=headers, timeout=30) as response:
                 body = await response.read()
-                base_url = str(response.url)
-                # print(f"For {entry.url} base_url={base_url} type(body)={type(body)}")
-                payload = base_url.encode('utf-8') + b'\n' + body
-
-            self.store.save(fpath, payload)
-            self.logger.log(entry, fpath, True)
-
-            if base_url != entry.url:
-                # XXX: If the crawler was redirected to a new URL, save it under both old URL and new URL
-                fpath_base = build_path(base_url, 'html.gz')
-                if not self.store.exists(fpath_base, self.PAGE_CACHE_TIME):
-                    self.store.save(fpath_base, payload)
-                    self.urls.add(fpath_base)
-            self.downloads += 1
-
-            return True
+                page = Page(str(response.url), body)
+            self.store.save_page(entry.url, page)
+            self.urls.add(page.url)
+            return 'success'
         except Exception as e:
             print(f"Downloading {entry.url} and got exception {type(e)}: {str(e)}")
-            #import traceback; traceback.print_exc()
-            self.logger.log(entry, fpath, False)
-            return False
+            import traceback
+            traceback.print_exc()
+            return 'error'
 
     async def fetch_host(self):
         queue = self.queue
@@ -134,45 +108,54 @@ class Host:
             async with ClientSession() as session:
                 while queue:
                     entry = queue.pop(0)
-                    success = await self.fetch_url(entry, session)
-                    if not success:
+                    status = await self.fetch_url(entry, session)
+                    if status == 'success':
+                        self.logger.log(entry, 'OK')
+                        self.downloaded += 1
+                    elif status == 'exists':
+                        print(f"Already exists: {entry.url}")
+                        # already downloaded
+                        pass
+                    elif status == 'forbidden':
+                        print(f"Forbidden by robots.txt: {entry.url}")
+                        self.logger.log(entry, 'forbidden')
+                    elif status == 'error':
                         if entry.attempts < 2:
                             entry.attempts += 1
                             print(f"Failed to download {entry.attempts} times: {entry.url}")
                             queue.append(entry)
                         else:
-                            #save empty doc
-                            print(f"Failed to download 3 times: {entry.url}")
-                            self.store.save(build_path(entry.url, 'html.gz'), entry.url.encode('utf-8') + b'\n')
+                            # save empty doc
+                            print(f"Failed to download after 3 attempts: {entry.url}")
+                            self.logger.log(entry, 'failed')
+                            self.store.save_page(entry.url, Page(entry.url, b''))
                     else:
-                        pass 
-                        # print(f"Download has finished: {entry.url}")
-                    await asyncio.sleep(self.HOST_SLEEP_TIME)
+                        raise Exception(f"Can't handle status {status}")
+                    if status in ['success', 'error']:
+                        await asyncio.sleep(self.HOST_SLEEP_TIME)
 
     def enqueue(self, entry: Entry):
         fn = entry.url.split('/')[-1]
         if '.' in fn:
             ext = fn.split('.')[-1].lower()
-            if ext in ['jpg', 'jpeg', 'png', 'gif', 'ico', 'mp3', 'wmv', 'wma', 'mp4', 'webp', 'flv', 'css', 'js']:
+            if ext in BAD_EXT:
                 return False
 
         if entry.url in self.urls:
             return False
-
         self.urls.add(entry.url)
 
-        if self.store.exists(build_path(entry.url, 'html.gz'), self.PAGE_CACHE_TIME):
+        if self.store.exists(entry.url):
             return False
-
         self.queue.append(entry)
         if len(self.queue) == 1:
             # queue for this host was empty -- start new fetch_host
-            loop = asyncio.get_event_loop()
-            loop.create_task(self.fetch_host())
+            asyncio.get_event_loop().create_task(self.fetch_host())
         return True
 
+
 class AsyncDownloader:
-    def __init__(self, store, logger):
+    def __init__(self, store: PageStore, logger: Logger):
         self.logger = logger
         self.store = store
         self.hosts = {}
@@ -182,48 +165,38 @@ class AsyncDownloader:
         if host not in self.hosts:
             self.hosts[host] = Host(self.store, self.logger, host)
         queue = self.hosts[host]
-        # print("Enqueue", entry)
         return queue.enqueue(entry)
 
-    def task_count(self):
-        count = 0
-        for h in self.hosts.values():
-            if h.lock.locked():
-                count += 1
-        return count
+    def active_hosts(self):
+        return {name: h for name, h in self.hosts.items() if h.lock.locked()}
 
-    def queue_size(self):
-        count = 0
-        for h in self.hosts.values():
-            count += len(h.queue)
-        return count
-
-    def total_size(self):
-        count = 0
-        for h in self.hosts.values():
-            count += len(h.urls)
-        return count
-
-    def downloads(self):
-        count = 0
-        for h in self.hosts.values():
-            count += h.downloads
-        return count
-
-    def exists(self, entry):
-        return self.store.exists(build_path(entry.url, 'html.gz'), PAGE_CACHE_TIME)
+    def print_stats(self):
+        active = self.active_hosts()
+        queue_size = sum([len(host.queue) for name, host in active.items()])
+        downloads = sum([h.downloaded for h in self.hosts.values()])
+        total_urls = sum([len(h.urls) for h in self.hosts.values()])
+        print(f"Downloading from {len(active)} hosts, queue size: {queue_size}, " +
+              f"downloaded: {downloads}, total: {total_urls}")
+        top_queued = Counter({name: len(host.queue) for name, host in active.items()})
+        if top_queued:
+            print("Top hosts:")
+            for name, count in top_queued.most_common(5):
+                downloaded = self.hosts[name].downloaded
+                total = count + downloaded
+                print(f"{name}: {downloaded} / {total}")
 
 
-async def watch_file(path, downloader, interval):
+async def watch_file(path: Path, downloader, interval):
     loaded = set()
     while True:
         total_added = 0
-        for fn in sorted(os.listdir(path)):
-            if not fn.startswith('feeds-'): continue
-            if fn in loaded: continue
+        for path_fn in sorted(path.glob('2018_*/*.txt'), reverse=True):
+            fn = str(path_fn)
+            if fn in loaded:
+                continue
             loaded.add(fn)
             entries, new_entries = 0, 0
-            for line in load_from_file(os.path.join(path, fn)):
+            for line in load_from_file(fn):
                 line = line.strip()
                 if not line:
                     continue
@@ -232,15 +205,13 @@ async def watch_file(path, downloader, interval):
                     continue
                 entries += 1
                 new_entries += int(downloader.enqueue(entry))
-            print(f"Found {entries}, added {new_entries} new entries from {fn}")
+            print(f"Found {entries:5d} entries, added {new_entries:3d} new entries from {path_fn.name}")
             total_added += new_entries
             if total_added >= 5000:
                 break
-        tc = downloader.task_count()
-        qs = downloader.queue_size()
-        ds = downloader.downloads()
-        ts = downloader.total_size()
-        print(f"Downloading from {tc} hosts, queue size: {qs}, downloaded: {ds}, total: {ts}")
+            if entries % 10 == 0:
+                break
+        downloader.print_stats()
         await asyncio.sleep(interval)
 
 
@@ -255,7 +226,7 @@ def run_test_server():
 
 
 def main(args):
-    store = Store(args.download_dir)
+    store = PageStore(FileStore(args.download_dir), PAGE_CACHE_TIME)
     logger = Logger(args.log_dir)
     downloader = AsyncDownloader(store, logger)
 
@@ -264,7 +235,7 @@ def main(args):
     if args.test_server:
         run_test_server()
 
-    watchdog = watch_file(args.input_dir,
+    watchdog = watch_file(Path(args.input_dir),
                           downloader=downloader,
                           interval=args.interval)
     try:

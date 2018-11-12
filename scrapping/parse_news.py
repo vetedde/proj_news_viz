@@ -3,10 +3,12 @@ import datetime
 import gzip
 import os
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin
 
 import bs4
 import tqdm
+
+from scrapping.store import is_same_site
 
 ARTICLES = Path('data/parser/articles/')
 LOGS = Path('data/parser/logs/')
@@ -14,42 +16,12 @@ LISTS = Path('data/parser/lists')
 
 
 def get_html_links(base_url, body):
-    base_parsed = urlsplit(base_url, scheme='http')
-    # print('get_html_links:', base_url, len(body))
-    base_domain = base_parsed.netloc
-    if base_domain.count('.') > 1:
-        parts = base_domain.split('.')
-        if parts[-2] == 'co':  # e.g. www.site.co.uk
-            base_domain = '.'.join(parts[-3:])
-        else:
-            base_domain = '.'.join(parts[-2:])
     soup = bs4.BeautifulSoup(body, 'lxml')
-
     for element in soup.find_all('a', href=True):
         url = element.get('href', '')
-
-        parsed_url = urlsplit(url, scheme=base_parsed.scheme)
-        if parsed_url.scheme not in ['', 'http', 'https']:
-            continue
-        if parsed_url.netloc:  # this is an absolute link
-            domain = '.' + parsed_url.netloc
-            if not domain.endswith('.' + base_domain):
-                continue
-
-        yield urljoin(base_url, url)
-
-
-def process_html_file(html_path: str, save_path: str):
-    """
-    Html parser for self reference links
-    html_parser parses html document for links belonging to
-    the same domain and stores it to txt file with one URL per
-    line.
-    Arguments:
-        html_path (str): Path to html file.
-        base_url (str): Domain name to search for.
-        save_path (str): Path for output file
-    """
+        url = urljoin(base_url, url)
+        if is_same_site(url, base_url):
+            yield urljoin(base_url, url)
 
 
 def find_files_to_parse(logs):
@@ -84,7 +56,6 @@ def find_urls(files):
     unique_urls = set()
     new_urls = []
     urls_counter = tqdm.tqdm()
-    last_unique_urls = set()
     processed = []
 
     for log_path, fpath in tqdm.tqdm(files):
@@ -109,7 +80,6 @@ def find_urls(files):
 
         if len(new_urls) > 10000:
             yield processed, new_urls
-            last_unique_urls = set(unique_urls)
             processed = []
             new_urls = []
 
@@ -118,14 +88,18 @@ def find_urls(files):
     urls_counter.close()
 
 
-if __name__ == '__main__':
+def main():
     files = list(find_files_to_parse(LOGS.glob('201?-??-??/*.csv')))
 
     for processed, new_urls in find_urls(files):
-        dpid = build_dpid().replace('/', '-')
+        dpid = build_dpid()
         with open(LISTS / f'parsed-{dpid}.txt', 'w+') as file:
             for url in new_urls:
                 file.write(url + '\n')
 
         for fpath in processed:
             os.rename(fpath, str(fpath) + '.crawled')
+
+
+if __name__ == '__main__':
+    main()

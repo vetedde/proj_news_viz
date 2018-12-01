@@ -1,9 +1,12 @@
 # coding: utf-8
 import re
 from gensim.models.ldamodel import LdaModel
-from gensim.models import CoherenceModel
+
+from gensim.models import CoherenceModel, LdaMulticore
 import pandas as pd
 import warnings
+import time
+
 warnings.filterwarnings("ignore")
 
 
@@ -41,7 +44,7 @@ def text_to_words(text, return_tokenized, lemmatizer, stop_words):
         return lemmatized
 
 
-def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
+def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3, use_multicore=False):
     """
     Расчёт c_v coherence для разного количества топиков.
 
@@ -58,7 +61,10 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
     start: int
         Стартовок количество топиков
     step : int
-        Щаг увеличения количества топиков
+        Шаг увеличения количества топиков
+    use_multicore : bool
+        Использовать LdaMulticore или нет
+
 
     Returns:
     -------
@@ -70,7 +76,13 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
     coherence_values = []
     model_list = []
     for num_topics in range(start, limit, step):
-        model = LdaModel(corpus, num_topics=num_topics, id2word=dictionary, passes=10, per_word_topics=True)
+        print(f'Num topics: {num_topics}. {time.ctime()}')
+        if use_multicore:
+            model = LdaMulticore(corpus, num_topics=num_topics, id2word=dictionary, passes=10, per_word_topics=True,
+                                 workers=5)
+        else:
+            model = LdaModel(corpus, num_topics=num_topics, id2word=dictionary, passes=10, per_word_topics=True)
+
         model_list.append(model)
         coherencemodel = CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
         coherence_values.append(coherencemodel.get_coherence())
@@ -81,7 +93,6 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start=2, step=3):
 def format_topics_sentences(ldamodel, corpus, texts):
     """
     Создаёт DdataFrame с информацией о самом распространённом топике для каждого текста.
-
 
     Параметры:
     ldamodel : Натренированная LDA модель
@@ -99,9 +110,13 @@ def format_topics_sentences(ldamodel, corpus, texts):
     words_per_topic = {j: [i[0] for i in ldamodel.show_topic(j)] for j in range(ldamodel.num_topics)}
 
     for i, row in enumerate(ldamodel[corpus]):
+        if ldamodel.per_word_topics == False:
+            # Самый распространённый топик в каждом тексте
+            row_topics = sorted(row, key=lambda x: x[1], reverse=True)
 
-        # Самый распространённый топик в каждом тексте
-        row_topics = sorted(row, key=lambda x: x[1], reverse=True)
+        else:
+            row_topics = sorted(row[0], key=lambda x: x[1], reverse=True)
+
         # Номер топика и его доля
         topic_num, prop_topic = row_topics[0]
         topic_keywords = ', '.join([word for word in words_per_topic[topic_num] if word in texts[i]])

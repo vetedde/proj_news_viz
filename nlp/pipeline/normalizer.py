@@ -5,6 +5,12 @@ morph = pymorphy2.MorphAnalyzer()
 
 
 class Normalizer(object):
+    """
+    Class for normalizing text data.
+
+    Currently supports nltk WordNetLemmatizer, pymorphy and mystem.
+
+    """
 
     def __init__(self, lemma : str = 'nltk'):
 
@@ -21,7 +27,7 @@ class Normalizer(object):
             lemmatizer = WordNetLemmatizer()
             lemmatized = [lemmatizer.lemmatize(w) for w in words]
         elif self.lemma == 'pymorphy':
-            lemmatized = lemmatize_pymorph(words)
+            lemmatized = self.lemmatize_pymorph(words)
         elif self.lemma == 'mystem':
             mystem = Mystem()
             lemmatized = mystem.lemmatize(words)
@@ -31,15 +37,7 @@ class Normalizer(object):
         else:
             return lemmatized
 
-    def lemmatize_pymorph(words):
-        '''
-        [0] токенизация предложения
-        [1] проверка есть ли в начале слова '-'
-        [2] проверка на стоп-слова
-        [3] проверка есть ли данное слово в кэше
-        [4] лемматизация слова
-        на выходе лист токенов
-        '''
+    def lemmatize_pymorph(self, words):
 
         words_lem = []
         for w in words:

@@ -1,10 +1,8 @@
 # coding: utf-8
 import re
 from nltk.corpus import stopwords
-#pip install razdel
-from razdel import tokenize # https://github.com/natasha/razdel
-#pip install pymorphy2
-import pymorphy2
+from razdel import tokenize # pip install razdel # https://github.com/natasha/razdel
+import pymorphy2 # pip install pymorphy2
 morph = pymorphy2.MorphAnalyzer()
 
 stopword_ru = stopwords.words('russian')
@@ -19,7 +17,7 @@ def clean_text(text):
     '''
     очистка текста
         
-    на выходе очищеный текст
+    на выходе - очищенный текст
     '''
     
     if not isinstance(text, str):
@@ -48,7 +46,7 @@ def lemmatization(text):
         [5] лемматизация слова
         [6] проверка на стоп-слова
         
-        на выходе лист отлемматизированых токенов
+    на выходе - лист отлемматизированых токенов
     '''
     
     # [0]

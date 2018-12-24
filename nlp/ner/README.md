@@ -1,9 +1,9 @@
 in this this folder we extract names
 
-by @marishadorosh
+by @marishadorosh:
 * extracting_NER.ipynb - how create extraction
 
-by @vtrokhymenko
+by @vtrokhymenko:
 * cleaned_names.ipynb - how extracted complete names
 * cleaned_names_rd.ipynb - r&d extraction (don't use in prod)
 * cleanedNames.py - the main file which u can use for u using flashtext like this

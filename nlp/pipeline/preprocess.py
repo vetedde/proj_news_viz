@@ -16,17 +16,19 @@ def clean_text(text, russian_words_only: bool = False, remove_stop: bool = True)
     """
 
     text = text.lower()
+    text = re.sub('ё', 'е', text.strip())
     if russian_words_only:
         text = re.sub("[^а-я]", ' ', text)
         text = text.strip('\n').strip('\r').strip('\t')
 
     else:
+        text = text.strip('\n').strip('\r').strip('\t')
+
         text = re.sub("-\s\r\n\|-\s\r\n|\r\n", '', str(text))
 
-        text = re.sub("[0-9]|[-.,:;_%©?*!@#№$^•·&()]|[+=]|[[]|[]]|[/]|", ' ', text)
+        text = re.sub("[0-9]|[-—.,:;_%©«»?*!@#№$^•·&()]|[+=]|[[]|[]]|[/]|", '', text)
         text = re.sub(r"\r\n\t|\n|\\s|\r\t|\\n", ' ', text)
-        text = re.sub(r'[\xad]|[\s+]', ' ', text)
-        text = re.sub('ё', 'е', text.strip())
+        text = re.sub(r'[\xad]|[\s+]', ' ', text.strip())
 
     if remove_stop:
         text = remove_stopwords(text)

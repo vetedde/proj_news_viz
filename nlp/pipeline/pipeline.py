@@ -58,7 +58,7 @@ class TopicModeller(object):
             if clean:
                 print('Cleaning')
                 self.data.loc[:, 'cleaned_text'] = self.data['text'].apply(
-                lambda x: preprocess.clean_text(x, russian_words_only=True, remove_stop=True))
+                lambda x: preprocess.clean_text(x, russian_words_only=False, remove_stop=True))
             else:
                 self.data.loc[:, 'cleaned_text'] = self.data['text']
     #
@@ -81,7 +81,7 @@ class TopicModeller(object):
         else:
             if clean:
                 print('Cleaning')
-                texts = [preprocess.clean_text(i, russian_words_only=True, remove_stop=True) for i in texts]
+                texts = [preprocess.clean_text(i, russian_words_only=False, remove_stop=True) for i in texts]
 
             if ngram > 1:
                 print('Creating ngrams')

@@ -10,8 +10,8 @@
 │       ├── conf       # feeds.csv, sources.csv , ...
 │       └── lists      # download_urls.txt , processed_urls.txt , ...
 ├── README.md
-└── scrapping          # скрипты для скраппинга
-└── nlp                # скрипты и тетрадки по nlp
+├── scrapping          # скрипты для скраппинга
+├── nlp                # скрипты и тетрадки по nlp
 │   ├── lemmatizers   # сравнение лемматизаторов
 │   ├── preprocessing   # скрипты для предобработки сырых текстов
 │   ├── ner   # распознавание именнованных сущностей
@@ -45,7 +45,7 @@ Python 3.6+
 - Pavel @p-kachalov
 - Andrey Malakhov @andreymalakhov
 - Yuri Baburov @buriy
-- Sviatoslav @iggisv9t
+- Sviatoslav @iggisv9t  
 Здесь могло быть ваше имя.
 
 ## Скрипты:

@@ -12,7 +12,12 @@
 ├── README.md
 └── scrapping          # скрипты для скраппинга
 └── nlp                # скрипты и тетрадки по nlp
-│   ├── topic_models   # тематическое моделирование
+│   ├── lemmatizers   # сравнение лемматизаторов
+│   ├── preprocessing   # скрипты для предобработки сырых текстов
+│   ├── ner   # распознавание именнованных сущностей
+│   └── topic_models   # тематическое моделирование
+│       └── experiments   # набор тетрадок с демонстрацией разных тематических моделей
+│           ├── gensim, bigartm, etc...
 ```
 
 ## Requirements
@@ -40,6 +45,7 @@ Python 3.6+
 - Pavel @p-kachalov
 - Andrey Malakhov @andreymalakhov
 - Yuri Baburov @buriy
+- Sviatoslav @iggisv9t
 Здесь могло быть ваше имя.
 
 ## Скрипты:

@@ -3,18 +3,17 @@ import pickle
 from flashtext import KeywordProcessor # pip install flashtext
 
 class KeyProc:
+    
+    with open('./data/cleaned_name.pickle', 'rb') as handle:
+        dict_cleaned_name = pickle.load(handle)
 
-	with open('data/cleaned_name.pickle', 'rb') as handle:
-		dict_cleaned_name = pickle.load(handle)
-		
-	kp = KeywordProcessor()
-	kp = kp.add_keywords_from_dict(dict_cleaned_name)
+    def __init__(self, dict = dict_cleaned_name):
+        #self.text = text
+        self.kp = KeywordProcessor()
+        self.kp.add_keywords_from_dict(dict)
 
-	#def __init__(self, kp, dict_cleaned_name):
-	#	self.kp = kp.add_keywords_from_dict(dict_cleaned_name)
+    def extractKeywords(self, text):
+        return self.kp.extract_keywords(text)
 
-	def extract_keywords(self, text):
-		return self.kp.extract_keywords(text)
-
-	def replace_keywords(self, text):
-		return self.kp.replace_keywords(text)
+    def replaceKeywords(self, text):
+        return self.kp.replace_keywords(text)

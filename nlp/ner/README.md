@@ -9,15 +9,17 @@ by @vtrokhymenko:
 * cleanedNames.py - the main file which u can use for u using flashtext like this
 
 ```
-import cleanedNames as cm
+from cleanedNames import KeyProc
 
 # for example
-text = '''абромавичус увидел гитлера и авраама линкольна врезав алешине'''
+text = '''когда дмитрий песков увидел владимира путина и авраама линкольна то подумал о иосифе сталине'''
 
-print(cm.extract_keywords(text))
->> ['авраам_линкольн']
-print(cm.replace_keywords(text))
->> абромавичус увидел гитлера и авраам_линкольн врезав алешине
+cn = KeyProc()
+
+print(cn.extractKeywords(text))
+>> ['дмитрий_песков', 'владимир_путин', 'авраам_линкольн', 'иосиф_сталин']
+print(cn.replaceKeywords(text))
+>> когда дмитрий_песков увидел владимир_путин и авраам_линкольн то подумал о иосиф_сталин
 ```
 
 p.s.

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    .vega-actions a {
+      margin-right: 12px;
+      color: #757575;
+      font-weight: normal;
+      font-size: 13px;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega@4"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@2.6.0"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@3"></script>
+</head>
+
+<body>
+  <div id="vis"></div>
+
+  <script type="text/javascript" src="data.json"></script>
+  <script>
+    var spec = {
+      "config": {
+        "view": {
+          "width": 1000,
+          "height": 600,
+          "autosize":"fit"
+        }
+      },
+      "hconcat": [{
+        "vconcat": [{
+          "data": {
+            "name": "mentions"
+          },
+          "mark": {
+            "type": "area",
+            "interpolate": "monotone"
+          },
+          "encoding": {
+            "color": {
+              "condition": {
+                "type": "nominal",
+                "field": "topic",
+                "legend": null,
+                "selection": "selector002"
+              },
+              "value": "lightgray"
+            },
+            "tooltip": {
+              "type": "nominal",
+              "field": "topic"
+            },
+            "x": {
+              "type": "temporal",
+              "field": "date"
+            },
+            "y": {
+              "type": "quantitative",
+              "field": "mentions",
+              "stack": "normalize"
+            }
+          },
+          "height": 330,
+          "selection": {
+            "selector002": {
+              "type": "multi",
+              "fields": ["topic"]
+            }
+          },
+          "transform": [{
+            "filter": {
+              "selection": "selector003"
+            }
+          }],
+          "width": 1200,
+          "height": 500
+        }, {
+          "data": {
+            "name": "total"
+          },
+          "mark": {
+            "type": "area",
+            "interpolate": "monotone"
+          },
+          "encoding": {
+            "x": {
+              "type": "temporal",
+              "axis": {
+                "orient": "top"
+              },
+              "field": "date",
+              "title": "select date"
+            },
+            "y": {
+              "type": "quantitative",
+              "field": "total",
+              "stack": "center"
+            }
+          },
+          "height": 100,
+          "selection": {
+            "selector003": {
+              "type": "interval",
+              "encodings": ["x"],
+              "empty": "all",
+              "fields": ["date"]
+            }
+          },
+          "width": 1200
+        }]
+      }, {
+        "data": {
+          "name": "mentions"
+        },
+        "mark": "point",
+        "encoding": {
+          "color": {
+            "condition": {
+              "type": "nominal",
+              "field": "topic",
+              "legend": null,
+              "selection": "selector002"
+            },
+            "value": "lightgray"
+          },
+          "y": {
+            "type": "nominal",
+            "axis": {
+              "orient": "right"
+            },
+            "field": "topic"
+          }
+        },
+        "height": 700,
+        "selection": {
+          "selector002": {
+            "type": "multi",
+            "fields": ["topic"]
+          }
+        }
+      }],
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json",
+      "datasets": dataset
+    };
+    var embedOpt = {
+      "mode": "vega-lite"
+    };
+
+    function showError(el, error) {
+      el.innerHTML = ('<div class="error" style="color:red;">' + '<p>JavaScript Error: ' + error.message + '</p>' + "<p>This usually means there's a typo in your chart specification. " + "See the javascript console for the full traceback.</p>" + '</div>');
+      throw error;
+    }
+    const el = document.getElementById('vis');
+    vegaEmbed("#vis", spec, embedOpt)
+      .catch(error => showError(el, error));
+  </script>
+</body>
+
+</html>

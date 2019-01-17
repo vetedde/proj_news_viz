@@ -22,7 +22,7 @@ class Normalizer(object):
             words = text.split()
         else:
             words = text
-
+        lemmatized = []
         if self.lemma == 'nltk':
             lemmatizer = WordNetLemmatizer()
             lemmatized = [lemmatizer.lemmatize(w) for w in words]

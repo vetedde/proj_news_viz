@@ -3,18 +3,21 @@ import preprocess
 from normalizer import Normalizer
 from gensim import corpora
 from gensim.models.ldamodel import LdaModel
-from gensim.models import CoherenceModel, LdaMulticore
+from gensim.models import CoherenceModel
 import pyLDAvis.gensim
 from gensim.models.phrases import Phrases, Phraser
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 # from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 # from visualizer import TopicVisualizer
 #import artm
 import scipy.sparse as ss
-from corextopic import corextopic as ct
-from corextopic import vis_topic as vt
+# from corextopic import corextopic as ct
+# from corextopic import vis_topic as vt
 import pickle
 from util import timeit, log
+import tm_functions
+import matplotlib.pyplot as plt
+from flashtext import KeywordProcessor
 
 class TopicModeller(object):
 
@@ -35,10 +38,9 @@ class TopicModeller(object):
         if self.data is None:
             raise FileNotFoundError('Data not defined!')
 
-
     @timeit
     def process(self, clean : bool = True, normalize : bool = True, lemma: str = 'nltk', texts : list = [],
-                ngram : int = 1):
+                ngram : int = 1, clean_ner : bool = False):
         """
         Cleaning and normalizing data.
 
@@ -53,24 +55,39 @@ class TopicModeller(object):
         :return: processed texts if texts were passed
         """
         print('Starting processing')
+        stopwords = []
+        with open('stopwords.txt', 'r', encoding='utf-8') as f:
+            for w in f.readlines():
+                stopwords.append(w.strip())
 
         if texts == []:
             if clean:
                 print('Cleaning')
                 self.data.loc[:, 'cleaned_text'] = self.data['text'].apply(
-                lambda x: preprocess.clean_text(x, russian_words_only=False, remove_stop=True))
+            lambda x: preprocess.clean_text(x, russian_words_only=False))
             else:
                 self.data.loc[:, 'cleaned_text'] = self.data['text']
-    #
+
+            if clean_ner:
+                print('Cleaning ners')
+                with open('data/cleaned_name.pickle', 'rb') as handle:
+                    dict_cleaned_name = pickle.load(handle)
+                kp = KeywordProcessor()
+                kp.add_keywords_from_dict(dict_cleaned_name)
+                clean_text = self.data['cleaned_text'].apply(lambda x: kp.replace_keywords(' '.join(x)).split(' '))
+                self.data['cleaned_text'] = clean_text
+
             if ngram > 1:
                 self.ngrams = []
                 print('Creating ngrams')
-                text_list = self.data.loc[:, 'cleaned_text'].values.copy()
+                text_list = [i for i in self.data.loc[:, 'cleaned_text'].values]
                 for i in range(ngram):
+                    # print(i)
                     text_list, ngram = self.generate_ngram(text_list)
                     self.ngrams.append(ngram)
 
                 self.data.loc[:, 'cleaned_text'] = text_list
+
 
             if normalize:
                 print('Normalizing')
@@ -78,10 +95,23 @@ class TopicModeller(object):
                 self.data.loc[:, 'tokenized_text'] = self.data['cleaned_text'].apply(
                     lambda x: normalizer.normalize(x, return_tokenized=True, simple_tokenize=False))
 
+            print('Removing stopwords')
+
+            self.data.loc[:, 'tokenized_text'] = self.data['tokenized_text'].apply(lambda x: [i for i in x if i not in stopwords])
+
         else:
             if clean:
                 print('Cleaning')
-                texts = [preprocess.clean_text(i, russian_words_only=False, remove_stop=True) for i in texts]
+                texts = [preprocess.clean_text(i, russian_words_only=False)
+                         for i in texts]
+
+            if clean_ner:
+                with open('data/cleaned_name.pickle', 'rb') as handle:
+                    dict_cleaned_name = pickle.load(handle)
+
+                kp = KeywordProcessor()
+                kp.add_keywords_from_dict(dict_cleaned_name)
+                texts = [kp.replace_keywords(line) for line in texts]
 
             if ngram > 1:
                 print('Creating ngrams')
@@ -92,6 +122,7 @@ class TopicModeller(object):
                 print('Normalizing')
                 normalizer = Normalizer(lemma=lemma)
                 texts = [normalizer.normalize(i, return_tokenized=True, simple_tokenize=False) for i in texts]
+            texts = [[w for w in line if w not in stopwords] for line in texts]
             return texts
 
 
@@ -144,7 +175,6 @@ class TopicModeller(object):
         self.corex_words = words
         self.doc_word = doc_word
 
-
     @timeit
     def build_model_gensim(self,
                     params : dict = {},
@@ -192,19 +222,19 @@ class TopicModeller(object):
 
 
     @timeit
-    def build_model_corex(self, num_topics : int):
-        """
-        Build model with corex
-        :param num_topics:
-        :return:
-        """
-        model = ct.Corex(n_hidden=num_topics,
-                               words=self.corex_words,
-                               max_iter=33,
-                               verbose=0,
-                               seed=1)
-        model.fit(self.doc_word, words=self.corex_words)
-        self.model = model
+    # def build_model_corex(self, num_topics : int):
+    #     """
+    #     Build model with corex
+    #     :param num_topics:
+    #     :return:
+    #     """
+    #     model = ct.Corex(n_hidden=num_topics,
+    #                            words=self.corex_words,
+    #                            max_iter=33,
+    #                            verbose=0,
+    #                            seed=1)
+    #     model.fit(self.doc_word, words=self.corex_words)
+    #     self.model = model
 
     @timeit
     def visualize(self, vis_type : str = 'pyLDAvis', save_file : str = 'vis.html'):
@@ -229,7 +259,7 @@ class TopicModeller(object):
                 pgv.save(save_file)
 
     @timeit
-    def extract_topics_gensim(self, texts : list = [], load_dict : str = '', doc_term_matrix = None):
+    def extract_topics_gensim(self, texts: list = [], load_dict: str = '', doc_term_matrix = None):
         """
         Extract topics from the texts.
 
@@ -253,7 +283,7 @@ class TopicModeller(object):
             return [self.model.get_document_topics(i) for i in self.doc_term_matrix]
 
     @timeit
-    def update_gensim_model(self, texts : list = []):
+    def update_gensim_model(self, texts: list = []):
         """
         Train gensim model on additional texts.
 
@@ -276,5 +306,67 @@ class TopicModeller(object):
                         max_vocab_size=40000000, delimiter=b'_',
                         progress_per=10000, scoring='default',
                         common_terms=frozenset())
-        ngrammed = [ngram[line] for line in text_list]
-        return ngrammed, ngram
+        ngram_phraser = Phraser(ngram)
+        ngrammed = ngram_phraser[text_list]
+        return list(ngrammed), ngram
+
+    @timeit
+    def get_stats(self):
+        """
+        Generate stats: for each text find the dominant topic.
+        Also for each topic find number of documents where it is dominant
+        :return:
+        """
+
+        df_topic_sents_keywords = tm_functions.format_topics_sentences(ldamodel=self.model,
+                                                                         corpus=self.doc_term_matrix,
+                                                                         texts=self.data['cleaned_text'].values)
+
+        df_dominant_topic = df_topic_sents_keywords.reset_index()
+        df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
+
+        top_indices = df_topic_sents_keywords.groupby('Dominant_Topic')['Perc_Contribution'].nlargest(1).reset_index()[
+            'level_1']
+        topic_counts = df_topic_sents_keywords['Dominant_Topic'].value_counts()
+
+        # Percentage of Documents for Each Topic
+        topic_contribution = round(topic_counts / topic_counts.sum(), 4)
+
+        # Topic Number and Keywords
+        condition = df_topic_sents_keywords.index.isin(top_indices)
+        topic_num_keywords = df_topic_sents_keywords[condition][['Dominant_Topic', 'Topic_Keywords']].reset_index(
+            drop=True)
+
+        # Concatenate Column wise
+        df_dominant_topics = pd.concat([topic_num_keywords, topic_counts, topic_contribution], axis=1)
+
+        # Change Column names
+        df_dominant_topics.columns = ['Dominant_Topic', 'Topic_Keywords', 'Num_Documents', 'Perc_Documents']
+
+        self.df_dominant_topic = df_dominant_topic
+
+    def plot_time_simple(self):
+        """
+        Prepare data for plotting and plot topic distribution over time
+        :return:
+        """
+
+        self.data['date'] = self.data['url'].apply(lambda x: pd.to_datetime('-'.join(x.split('/')[4:7])))
+        self.data['year_month'] = self.data['date'].values.astype('datetime64[M]')
+
+        self.data['topics'] = [self.model.get_document_topics(i) for i in self.doc_term_matrix]
+        self.data['topics_dict'] = self.data['topics'].apply(lambda x: {i[0]: i[1] for i in x})
+
+        for i in range(self.model.num_topics):
+            self.data['topic_' + str(i)] = self.data['topics_dict'].apply(lambda x: x[i] if i in x.keys() else 0)
+
+        self.data = self.data.sort_values('year_month')
+
+        self.data.loc[self.data['year_month'] == '1914-09-01 00:00:00', 'year_month'] = pd.Timestamp(year=2014, month=9,
+                                                                                                 day=1, hour=0)
+        topic_cols = [col for col in self.data.columns if 'topic_' in col]
+        a = self.data.groupby(['year_month'])[topic_cols].mean()
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.stackplot(a.index, a.T.values, labels=list(a.columns))
+        plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1.0))
+        plt.show()

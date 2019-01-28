@@ -1,12 +1,15 @@
 # coding: utf-8
 import re
 from nltk.corpus import stopwords
-from razdel import tokenize # pip install razdel # https://github.com/natasha/razdel
-import pymorphy2 # pip install pymorphy2
+from razdel import tokenize  # pip install razdel # https://github.com/natasha/razdel
+import pymorphy2  # pip install pymorphy2
+from pkg_resources import resource_filename
+
 morph = pymorphy2.MorphAnalyzer()
 
 stopword_ru = stopwords.words('russian')
-with open('stopwords.txt', 'r', encoding='utf-8') as f:
+stopwords_filename = resource_filename(__name__, "stopwords.txt")
+with open(stopwords_filename, 'r', encoding='utf-8') as f:
     for w in f.readlines():
         stopword_ru.append(w)
 
@@ -26,7 +29,7 @@ def clean_text(text):
     text = text.lower()
     text = text.strip('\n').strip('\r').strip('\t')
 
-    text = re.sub("-\s\r\n\|-\s\r\n|\r\n", '', str(text))
+    text = re.sub(r"-\s\r\n\|-\s\r\n|\r\n", '', str(text))
 
     text = re.sub("[0-9]|[-—.,:;_%©«»?*!@#№$^•·&()]|[+=]|[[]|[]]|[/]|[\"]", '', text)
     text = re.sub(r"\r\n\t|\n|\\s|\r\t|\\n", ' ', text)

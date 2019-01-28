@@ -1,4 +1,5 @@
 import pandas as pd
+import ast
 import artm
 import matplotlib.pyplot as plt
 import os
@@ -8,12 +9,13 @@ import sys
 import numpy as np
 import pprint
 import shutil
-from logging_functions import init_logger
 import tqdm
 
+from logging_functions import init_logger
+
 # TODO should be import from package not with using sys
-sys.path.append('../preprocessing')
-from preprocessing_tools import clean_text, token_stop_pymorph
+sys.path.append('../../../preprocessing')
+from preprocessing_tools import clean_text, lemmatization
 
 
 class TopicModel:
@@ -33,9 +35,13 @@ class TopicModel:
         self.batch_vectorizer = None
         self.dictionary = None
 
-    def load_data(self, path):
+    def load_data(self, path, convert_processed_text=False):
         self.logger.info("Loading data from %s ...", path)
-        return pd.read_csv(path)
+        df = pd.read_csv(path)
+        if convert_processed_text:
+            df['lemmatized_text'] = df['lemmatized_text'].apply(
+                ast.literal_eval)
+        return df
 
     @staticmethod
     def save_data(data, path, **kwargs):
@@ -67,7 +73,7 @@ class TopicModel:
         self.logger.info("Tokenize and normalize text...")
         if use_preprocessing:
             lemmatized_text = data_text.apply(
-                lambda x: token_stop_pymorph(clean_text(x)))
+                lambda x: lemmatization(clean_text(x)))
         else:
             lemmatized_text = data_text.apply(
                 lambda x: [self.normalize_word(word)
@@ -116,15 +122,23 @@ class TopicModel:
     def filter_dictionary(self, **kwargs):
         self.dictionary.filter(**kwargs)
 
-    def init_model(self, model_name='ARTM', num_topics=100, **kwargs):
-        if model_name not in ('ARTM', 'hARTM', 'LDA'):
+    def init_model(self, model_level=None, model_name='ARTM', num_topics=100,
+                   **kwargs):
+        if model_name not in ('ARTM', 'LDA', 'hARTM'):
             raise ValueError(f'No model in artm for {model_name}')
 
         self.logger.info("Initializing %s model", model_name)
-        model_type = getattr(artm, model_name)
-        model = model_type(num_topics=num_topics, dictionary=self.dictionary,
-                           **kwargs)
+        if model_name == 'hARTM' and model_level is not None:
+            model = self._init_hartm(model_level)
+        else:
+            model_type = getattr(artm, model_name)
+            model = model_type(num_topics=num_topics,
+                               dictionary=self.dictionary, **kwargs)
         self.model = model
+
+    def _init_hartm(self, model_level):
+        model_level.initialize(dictionary=self.dictionary)
+        return model_level
 
     def add_scores(self, log_scores=True, **kwargs):
         for scorer, values in kwargs.items():
@@ -185,11 +199,13 @@ class TopicModel:
     def load_model(self, path='model_fitted'):
         self.model = artm.load_artm_model(path)
 
-    def get_time_topics(self, id_date):
+    def get_time_topics(self, id_date, topics=None):
         theta = self.model.transform(batch_vectorizer=self.batch_vectorizer)
         theta = theta.T
         joined = id_date.join(theta)
-        topics = ['topic_{}'.format(i) for i in range(self.model.num_topics)]
+        if topics is None:
+            topics = ['topic_{}'.format(i) 
+                      for i in range(self.model.num_topics)]
         gb = joined.groupby(['year', 'month'])[topics].sum()
         return gb
 
@@ -200,15 +216,21 @@ class TopicModel:
             elif hasattr(scorer, 'last_average_coherence'):
                 print(f'{score_name}: {scorer.last_average_coherence: .3f}')
 
-    def plot_perplexity(self, skip_first=True):
+    def plot_perplexity(self, skip_first=True, score_name='PerplexityScore'):
+        return self.plot_score(score_name, skip_first=skip_first)
+
+    def plot_score(self, score_name, skip_first=True, ylabel=None):
         idx_start = 1 if skip_first else 0
         plt.plot(list(range(self.model.num_phi_updates))[idx_start:],
-                 self.model.score_tracker['PerplexityScore'].value[idx_start:],
+                 self.model.score_tracker[score_name].value[idx_start:],
                  'r--', linewidth=2)
+        if ylabel is None:
+            ylabel = 'ARTM perp. (red)'
         plt.xlabel('Iterations count')
-        plt.ylabel('ARTM perp. (red)')
+        plt.ylabel(ylabel)
         plt.grid(True)
         return plt.gca()
+
 
     @staticmethod
     def get_id_date(data, id_col='docID'):

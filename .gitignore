@@ -16,3 +16,11 @@ __pycache__/
 .venv/
 
 /data
+
+#separateTopics
+*.csv.bz2
+*.batch
+bigartm.data-MS-*
+nlp/topic_models/separateTopics/data/batches/*
+nlp/topic_models/separateTopics/data/dicts/*
+nlp/topic_models/separateTopics/data/vwpath/*

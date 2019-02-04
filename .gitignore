@@ -18,6 +18,9 @@ __pycache__/
 /data
 
 #separateTopics
+bigartm.ERROR*
+bigartm.INFO*
+bigartm.WARNING*
 *.csv.bz2
 *.batch
 bigartm.data-MS-*

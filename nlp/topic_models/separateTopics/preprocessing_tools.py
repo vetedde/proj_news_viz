@@ -1,14 +1,14 @@
 # coding: utf-8
 import re
-from nltk.corpus import stopwords
+#from nltk.corpus import stopwords
 from razdel import tokenize # pip install razdel # https://github.com/natasha/razdel
 import pymorphy2 # pip install pymorphy2
 morph = pymorphy2.MorphAnalyzer()
 
-stopword_ru = stopwords.words('russian')
-with open('data/stopwords.txt', 'r', encoding='utf-8') as f:
+stopword_ru = [] #stopwords.words('russian')
+with open('stopwords.txt', 'r', encoding='utf-8') as f:
     for w in f.readlines():
-        stopword_ru.append(w)
+        stopword_ru.append(re.sub('\n','',w))
 
 cache = {}  # для кеша лемм
 

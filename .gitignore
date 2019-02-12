@@ -23,6 +23,7 @@ bigartm.INFO*
 bigartm.WARNING*
 *.csv.bz2
 *.batch
+*.vw
 bigartm.data-MS-*
 nlp/topic_models/separateTopics/data/batches/*
 nlp/topic_models/separateTopics/data/dicts/*

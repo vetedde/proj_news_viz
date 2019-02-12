@@ -25,6 +25,10 @@ bigartm.WARNING*
 *.batch
 *.vw
 bigartm.data-MS-*
-nlp/topic_models/separateTopics/data/batches/*
-nlp/topic_models/separateTopics/data/dicts/*
-nlp/topic_models/separateTopics/data/vwpath/*
+nlp/topic_models/separateTopics/lenta/data/batches/*
+nlp/topic_models/separateTopics/lenta/data/dicts/*
+nlp/topic_models/separateTopics/lenta/data/vwpath/*
+
+nlp/topic_models/separateTopics/interfax/data/batches/*
+nlp/topic_models/separateTopics/interfax/data/dicts/*
+nlp/topic_models/separateTopics/interfax/data/vwpath/*

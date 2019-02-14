@@ -32,3 +32,8 @@ nlp/topic_models/separateTopics/lenta/data/vwpath/*
 nlp/topic_models/separateTopics/interfax/data/batches/*
 nlp/topic_models/separateTopics/interfax/data/dicts/*
 nlp/topic_models/separateTopics/interfax/data/vwpath/*
+
+nlp/topic_models/separateTopics/compare/data/lenta/vwpath/*
+nlp/topic_models/separateTopics/compare/data/lenta/batches/*
+nlp/topic_models/separateTopics/compare/data/interfax/vwpath/*
+nlp/topic_models/separateTopics/compare/data/interfax/batches/*

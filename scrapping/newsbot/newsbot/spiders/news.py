@@ -1,4 +1,5 @@
 from urllib.parse import urlsplit
+from datetime import datetime, timedelta
 
 import scrapy
 from scrapy.loader import ItemLoader
@@ -23,6 +24,14 @@ class NewsSpider(scrapy.Spider):
         assert self.config.date_format
         assert self.config.text_path
         assert self.config.topics_path
+
+        # Trying to parse 'until_date' param as date
+        if 'until_date' in kwargs:
+            kwargs['until_date'] = datetime.strptime(kwargs['until_date'], '%d.%m.%Y').date()
+        else:
+            # If there's no 'until_date' param, get articles for today and yesterday
+            kwargs['until_date'] = (datetime.now() - timedelta(days=1)).date()
+
         super().__init__(*args, **kwargs)
 
     def parse_document(self, response):

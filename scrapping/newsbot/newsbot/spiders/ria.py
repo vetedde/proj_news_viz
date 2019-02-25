@@ -1,9 +1,11 @@
+from datetime import datetime
+
+import requests
+import lxml.html
+
 import scrapy
-from newsbot.items import Document
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 from scrapy.linkextractors import LinkExtractor
-from urllib.parse import urlsplit
-from datetime import datetime
 
 
 class RiaSpider(NewsSpider):
@@ -17,12 +19,19 @@ class RiaSpider(NewsSpider):
         topics_path='//a[contains(@class, "article__tags-item")]/text()'
     )
     news_le = LinkExtractor(restrict_css='div.lenta__item')
-    max_page_depth = 4
 
     def parse(self, response):
         article_links = self.news_le.extract_links(response)
 
-        if response.meta.get('page_depth', 1) < self.max_page_depth:
+        last_link = ''
+        for link in article_links:
+            last_link = link.url
+
+            yield scrapy.Request(url=link.url, callback=self.parse_document)
+
+        dt = self._get_last_dt_on_page(last_link)
+
+        if datetime.strptime(dt, self.config.date_format).date() >= self.until_date:
             # Getting and forming the next page link
             next_page_link = response.xpath('//div[contains(@class, "lenta__item")]/@data-next').extract()[0]
             link_url = '{}{}'.format(self.start_urls[0], next_page_link)
@@ -33,9 +42,6 @@ class RiaSpider(NewsSpider):
                                  meta={'page_depth': response.meta.get('page_depth', 1) + 1}
                                  )
 
-        for link in article_links:
-            yield scrapy.Request(url=link.url, callback=self.parse_document)
-
     def parse_document(self, response):
         for res in super().parse_document(response):
             # Leave only the last tag
@@ -43,3 +49,13 @@ class RiaSpider(NewsSpider):
             res['topics'] = [res['topics'][-1]]
 
             yield res
+
+    def _get_last_dt_on_page(self, link):
+        r = requests.get(link)
+        source_code = r.text
+
+        root = lxml.html.fromstring(source_code)
+
+        dt = root.xpath(self.config.date_path)[0]
+
+        return dt

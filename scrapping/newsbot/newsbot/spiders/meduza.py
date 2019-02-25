@@ -25,20 +25,34 @@ class MeduzaSpider(NewsSpider):
         text_path='_',
         topics_path='_'
     )
-    max_page_depth = 4
 
     def parse(self, response):
+        last_page = False
+
         jsonresponse = json.loads(response.body_as_unicode())
 
+        # Getting article items
         articles = [content for _, content in jsonresponse['documents'].items()]
+        # Sorting them from the most recent to the most late one
+        articles = sorted(articles, key=lambda x: x['published_at'], reverse=True)
+
+        # Filtering out late articles and checking if we have reached the "until_date"
+        filtered_articles = []
+        for content in articles:
+            pub_date = datetime.strptime(content['pub_date'], '%Y-%m-%d').date()
+            if pub_date >= self.until_date:
+                filtered_articles.append(content)
+            else:
+                last_page = True
 
         # Iterating through news on this page
-        for content in articles:
+        for content in filtered_articles:
             full_url = self.article_link_tmpl.format(content['url'])
+
             yield scrapy.Request(url=full_url, callback=self.parse_document)
 
         # Requesting a new page if needed
-        if response.meta.get('page_depth', 1) < self.max_page_depth and jsonresponse['has_next']:
+        if not last_page and jsonresponse['has_next']:
             page_depth = response.meta.get('page_depth', 1)
 
             link_url = self.page_link_tmpl.format(page_depth)

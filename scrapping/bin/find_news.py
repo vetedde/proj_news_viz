@@ -1,13 +1,13 @@
 import csv
-import io
 import time
 from pathlib import Path
 
 import feedparser
 
+from scrapping.uniscrape.globals import is_all_cool
 from scrapping.uniscrape.htmls import get_html_links
 from scrapping.uniscrape.links import save_links
-from scrapping.uniscrape.store import Downloader, PageStore, FileStore, RobotsParser
+from scrapping.uniscrape.store import Downloader, PageStore, FileStore
 
 FEEDS = 'data/parser/conf/feeds.csv'
 SOURCES = 'data/parser/conf/sources.csv'
@@ -16,14 +16,6 @@ LISTS = Path('data/parser/lists/')
 
 CACHE_TIME = 60 * 5
 TEST_MODE = False
-
-
-def csv2string(rows):
-    si = io.StringIO()
-    cw = csv.writer(si)
-    for row in rows:
-        cw.writerow(row)
-    return si.getvalue().strip('\r\n').encode('utf-8')
 
 
 def load_feeds(downloader: Downloader):
@@ -97,21 +89,22 @@ def load_main_pages(downloader: Downloader):
                 continue
             print("Parsing page", site_url)
             for found_url in get_html_links(base_url, body):
-                urls.add(found_url)
+                if is_all_cool(found_url):
+                    urls.add(found_url)
     return urls
 
 
 def main():
     file_store = FileStore(DOWNLOAD_ROOT)
-    robots = RobotsParser(PageStore(file_store, 86400))  # one day
     downloader = Downloader(PageStore(file_store, CACHE_TIME))
 
     urls = load_feeds(downloader)
 
     for url in sorted(load_main_pages(downloader)):
-        if not robots.can_fetch(url):
-            print(f"Skipping {url}, forbidden by robots.txt")
-        urls.add(url)
+        if is_all_cool(url):
+            urls.add(url)
+        else:
+            print(f"Skipping {url}, it's not cool")
 
     if urls:
         fn = save_links(LISTS, urls)

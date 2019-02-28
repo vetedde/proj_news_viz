@@ -1,4 +1,8 @@
 import csv
+import sys
+from urllib.parse import urlparse
+
+csv.field_size_limit(sys.maxsize)
 
 
 def get_sites(sources):
@@ -21,3 +25,23 @@ def get_sites(sources):
         else:
             yield name, 'http://' + site
             yield name, 'https://' + site
+
+
+def get_hostname(url):
+    host = urlparse(url).hostname or ''
+    return host
+
+
+def get_sitename(url):
+    host = get_hostname(url)
+    if host.count('.') > 1:
+        parts = host.split('.')
+        if parts[-2] == 'co':  # e.g. www.site.co.uk
+            host = '.'.join(parts[-3:])
+        else:
+            host = '.'.join(parts[-2:])
+    return host
+
+
+def is_same_site(url_a, url_b):
+    return get_sitename(url_a) == get_sitename(url_b)

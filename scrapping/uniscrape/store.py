@@ -11,6 +11,8 @@ from urllib.robotparser import RobotFileParser
 import requests
 from fake_useragent import UserAgent
 
+from scrapping.uniscrape.sites import is_same_site
+
 
 def build_path(s: str, ext: str):
     fhash = str(hashlib.md5(s.encode()).hexdigest())
@@ -125,26 +127,6 @@ class Downloader:
         return self.page_store.exists(url)
 
 
-def get_hostname(url):
-    host = urlparse(url).hostname or ''
-    return host
-
-
-def get_sitename(url):
-    host = get_hostname(url)
-    if host.count('.') > 1:
-        parts = host.split('.')
-        if parts[-2] == 'co':  # e.g. www.site.co.uk
-            host = '.'.join(parts[-3:])
-        else:
-            host = '.'.join(parts[-2:])
-    return host
-
-
-def is_same_site(url_a, url_b):
-    return get_sitename(url_a) == get_sitename(url_b)
-
-
 class RobotsParser:
     DISALLOW_ALL = b'User-agent: *\r\nDisallow: /'
     ALLOW_ALL = b'User-agent: *\r\nDisallow:'
@@ -187,6 +169,12 @@ class RobotsParser:
 def build_dpid():
     dt = str(datetime.datetime.utcnow())
     return "{}-{}-{}".format(dt[:10].replace('-', '_'), dt[11:19].replace(':', '_'), os.getpid())
+
+
+def build_dpid_slash():
+    fpath = build_dpid().replace('-', '/', 1)
+    os.makedirs(fpath, exist_ok=True)
+    return fpath
 
 
 def main():

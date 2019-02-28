@@ -1,4 +1,4 @@
-from scrapping.uniscrape.store import build_dpid, get_sitename
+from scrapping.uniscrape.store import build_dpid
 
 links_added = set()
 
@@ -44,7 +44,7 @@ class Links:
         self.close()
 
 
-def load_from_file(fpath: str):
+def load_links(fpath: str):
     with open(fpath, 'r') as fin:
         urls = [line.strip() for line in fin]
     return urls
@@ -61,4 +61,4 @@ class LinksFolder:
             if fn in self.loaded:
                 continue
             self.loaded.add(fn)
-            yield path_fn, load_from_file(fn)
+            yield path_fn, load_links(fn)

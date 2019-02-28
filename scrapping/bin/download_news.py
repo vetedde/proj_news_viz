@@ -10,14 +10,11 @@ from urllib.parse import urldefrag
 from aiohttp import web, ClientSession
 from fake_useragent import UserAgent
 
+from scrapping.uniscrape.conf import BAD_EXT, LISTS
+from scrapping.uniscrape.globals import is_allowed, is_good_url, can_fetch, get_store
 from scrapping.uniscrape.links import LinksFolder
-from scrapping.uniscrape.sites import get_sites
-from scrapping.uniscrape.store import PageStore, FileStore, get_hostname, Page, RobotsParser, build_dpid, get_sitename
-
-PAGE_CACHE_TIME = 86400 * 365 * 100  # 100 years
-BAD_EXT = frozenset(['jpg', 'jpeg', 'png', 'gif', 'ico', 'mp3', 'wmv', 'wma', 'mp4', 'webp', 'flv', 'css', 'js'])
-SOURCES = 'data/parser/conf/sources.csv'
-ALLOWED_SITES = set(get_sitename(url) for name, url in get_sites(SOURCES))
+from scrapping.uniscrape.sites import get_hostname
+from scrapping.uniscrape.store import PageStore, Page, build_dpid, build_dpid_slash
 
 
 class Entry:
@@ -51,8 +48,7 @@ class Logger:
     def rotate_log(self):
         if self.log_file:
             self.log_file.close()
-        log_fpath = self.log_root / build_dpid().replace('-', '/', 1)
-        log_fpath.parent.mkdir(parents=True, exist_ok=True)
+        log_fpath = self.log_root / build_dpid_slash()
         self.log_file = open(str(log_fpath) + '.csv', 'w', newline='')
 
     def log(self, entry: Entry, status: str):
@@ -78,18 +74,12 @@ class Host:
         self.lock = asyncio.Lock()
         self.urls = set()
         self.downloaded = 0
-        self.robots = RobotsParser(store)
-
-    def can_fetch(self, url):
-        if url.startswith('https://www.kommersant.ru/doc/'):
-            return True
-        return self.robots.can_fetch(url)
 
     async def fetch_url(self, entry: Entry, session: ClientSession):
         if self.store.exists(entry.url):
             return 'exists'
         try:
-            if not self.can_fetch(entry.url):
+            if not can_fetch(entry.url):
                 entry.attempts = 2
                 return 'forbidden'
             headers = {'User-Agent': self.uar}
@@ -120,7 +110,7 @@ class Host:
                         # already downloaded
                         pass
                     elif status == 'forbidden':
-                        print(f"Forbidden by robots.txt: {entry.url}")
+                        #print(f"Forbidden by robots.txt: {entry.url}")
                         self.logger.log(entry, 'forbidden')
                     elif status == 'error':
                         if entry.attempts < 2:
@@ -194,14 +184,16 @@ async def watch_file(lists_dir: Path, downloader, interval):
     while True:
         total_added = 0
         total_found = 0
-        for path_fn, links in files.load_files():
+        for path_fn, urls in files.load_files():
             entries, new_entries = 0, 0
-            for line in links:
-                if not line:
+            for url in urls:
+                if not url:
                     continue
-                if get_sitename(line) not in ALLOWED_SITES:
+                if not is_allowed(url):
                     continue
-                entry = Entry(line)
+                if not is_good_url(url):
+                    continue
+                entry = Entry(url)
                 if not entry.host:
                     continue
                 entries += 1
@@ -212,7 +204,7 @@ async def watch_file(lists_dir: Path, downloader, interval):
             total_added += new_entries
             if total_added >= 10000:
                 break
-            if total_found >= 100000:
+            if total_found >= 500000:
                 break
         downloader.print_stats()
         await asyncio.sleep(interval)
@@ -229,7 +221,7 @@ def run_test_server():
 
 
 def main(args):
-    store = PageStore(FileStore(args.download_dir), PAGE_CACHE_TIME)
+    store = get_store()
     logger = Logger(args.log_dir)
     downloader = AsyncDownloader(store, logger)
 
@@ -238,7 +230,7 @@ def main(args):
     if args.test_server:
         run_test_server()
 
-    watchdog = watch_file(Path(args.input_dir),
+    watchdog = watch_file(LISTS,
                           downloader=downloader,
                           interval=args.interval)
     try:
@@ -251,8 +243,6 @@ def main(args):
 
 def _parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_dir', type=str, default='data/parser/lists/')
-    parser.add_argument('--download_dir', type=str, default='data/parser/articles/')
     parser.add_argument('--log_dir', type=str, default='data/parser/logs/')
     parser.add_argument('--interval', type=int, default=1)
     parser.add_argument('--test-server', type=bool, default=False)

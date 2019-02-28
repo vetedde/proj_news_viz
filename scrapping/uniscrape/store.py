@@ -65,23 +65,32 @@ class URLStore:
         return self.store.exists(fpath, cache_time=self.cache_time)
 
 
+def _load_page(content: bytes) -> Page:
+    final_url, body = content.split(b'\n', 1)
+    return Page(final_url.decode('utf-8'), body)
+
+
+def _save_page(url: str, body: bytes):
+    return url.encode('utf-8') + b'\n' + body
+
+
 class PageStore(URLStore):
     def load_page(self, url: str) -> Page:
-        final_url, body = self.load_url(url).split(b'\n', 1)
-        return Page(final_url.decode('utf-8'), body)
+        return _load_page(self.load_url(url))
 
     def save_page(self, url: str, page: Page):
         assert isinstance(page, Page)
         if not is_same_site(url, page.url):
-            self.save_url(url, page.url.encode('utf-8') + b'\n' + b'<!-- external URL -->')
+            self.save_url(url, _save_page(page.url, b'<!-- external URL -->'))
         else:
-            raw = page.url.encode('utf-8') + b'\n' + page.body
+            raw = _save_page(page.url, page.body)
             self.save_url(url, raw)
             if page.url != url:
                 self.save_url(page.url, raw)
 
     def save_empty_page(self, url: str):
         self.save_page(url, Page(url, b''))
+
 
 def download_page(url: str, ua: str, timeout: int = 30):
     print("Downloading", url)

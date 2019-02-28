@@ -2,26 +2,17 @@ import csv
 import datetime
 import gzip
 import os
+import traceback
 from pathlib import Path
-from urllib.parse import urljoin
 
-import bs4
 import tqdm
 
-from scrapping.store import is_same_site
+from scrapping.uniscrape.htmls import get_html_links
+from scrapping.uniscrape.store import PageStore
 
 ARTICLES = Path('data/parser/articles/')
 LOGS = Path('data/parser/logs/')
 LISTS = Path('data/parser/lists')
-
-
-def get_html_links(base_url, body):
-    soup = bs4.BeautifulSoup(body, 'lxml')
-    for element in soup.find_all('a', href=True):
-        url = element.get('href', '')
-        url = urljoin(base_url, url)
-        if is_same_site(url, base_url):
-            yield urljoin(base_url, url)
 
 
 def find_files_to_parse(logs):
@@ -32,7 +23,6 @@ def find_files_to_parse(logs):
             lines = list(csv.reader(open(log_path, 'r')))
         except Exception as e:
             print(f"File: {log_path} Exception: {e}")
-            import traceback;
             traceback.print_exc()
             yield log_path, None
             continue
@@ -41,7 +31,8 @@ def find_files_to_parse(logs):
                 # print("Bad info:", parts)
                 continue
             site, url, status, attempts, fpath = parts
-            if fpath in files: continue
+            if fpath in files:
+                continue
             files.add(fpath)
             yield None, fpath
         yield log_path, None
@@ -50,6 +41,10 @@ def find_files_to_parse(logs):
 def build_dpid():
     dt = str(datetime.datetime.utcnow())
     return "{}/{}-{}".format(dt[:10], dt[11:19].replace(':', '_'), os.getpid())
+
+
+def parse_file(store: PageStore, fn: str):
+    store.store.load(fn)
 
 
 def find_urls(files):

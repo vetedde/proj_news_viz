@@ -10,15 +10,21 @@ from urllib.parse import urldefrag
 from aiohttp import web, ClientSession
 from fake_useragent import UserAgent
 
-from scrapping.store import PageStore, FileStore, get_hostname, Page, RobotsParser, build_dpid
+from scrapping.uniscrape.links import LinksFolder
+from scrapping.uniscrape.sites import get_sites
+from scrapping.uniscrape.store import PageStore, FileStore, get_hostname, Page, RobotsParser, build_dpid, get_sitename
 
 PAGE_CACHE_TIME = 86400 * 365 * 100  # 100 years
+BAD_EXT = frozenset(['jpg', 'jpeg', 'png', 'gif', 'ico', 'mp3', 'wmv', 'wma', 'mp4', 'webp', 'flv', 'css', 'js'])
+SOURCES = 'data/parser/conf/sources.csv'
+ALLOWED_SITES = set(get_sitename(url) for name, url in get_sites(SOURCES))
 
 
 class Entry:
     source: str
     url: str
     attempts: int
+    downloaded: bool
 
     def __init__(self, url, source=None):
         assert isinstance(url, str)
@@ -27,15 +33,10 @@ class Entry:
         self.source = source or self.host
         self.url = url
         self.attempts = 0
+        self.downloaded = False
 
     def __str__(self):
         return f"<Entry: {self.url}, errors: {self.attempts}>"
-
-
-def load_from_file(fpath: str):
-    with open(fpath, 'r') as fin:
-        urls = [line.strip() for line in fin]
-    return urls
 
 
 class Logger:
@@ -64,9 +65,6 @@ class Logger:
         self.log_file.flush()
 
 
-BAD_EXT = frozenset(['jpg', 'jpeg', 'png', 'gif', 'ico', 'mp3', 'wmv', 'wma', 'mp4', 'webp', 'flv', 'css', 'js'])
-
-
 class Host:
     HOST_SLEEP_TIME = 1
 
@@ -82,11 +80,16 @@ class Host:
         self.downloaded = 0
         self.robots = RobotsParser(store)
 
+    def can_fetch(self, url):
+        if url.startswith('https://www.kommersant.ru/doc/'):
+            return True
+        return self.robots.can_fetch(url)
+
     async def fetch_url(self, entry: Entry, session: ClientSession):
         if self.store.exists(entry.url):
             return 'exists'
         try:
-            if not self.robots.can_fetch(entry.url):
+            if not self.can_fetch(entry.url):
                 entry.attempts = 2
                 return 'forbidden'
             headers = {'User-Agent': self.uar}
@@ -186,30 +189,30 @@ class AsyncDownloader:
                 print(f"{name}: {downloaded} / {total}")
 
 
-async def watch_file(path: Path, downloader, interval):
-    loaded = set()
+async def watch_file(lists_dir: Path, downloader, interval):
+    files = LinksFolder(lists_dir)
     while True:
         total_added = 0
-        for path_fn in sorted(path.glob('2018_*/*.txt'), reverse=True):
-            fn = str(path_fn)
-            if fn in loaded:
-                continue
-            loaded.add(fn)
+        total_found = 0
+        for path_fn, links in files.load_files():
             entries, new_entries = 0, 0
-            for line in load_from_file(fn):
-                line = line.strip()
+            for line in links:
                 if not line:
                     continue
-                entry = Entry(line.strip())
+                if get_sitename(line) not in ALLOWED_SITES:
+                    continue
+                entry = Entry(line)
                 if not entry.host:
                     continue
                 entries += 1
                 new_entries += int(downloader.enqueue(entry))
-            print(f"Found {entries:5d} entries, added {new_entries:3d} new entries from {path_fn.name}")
+            print(
+                f"Found {entries:5d} entries, added {new_entries:3d} new entries from {path_fn.parent.name}/{path_fn.name}")
+            total_found += entries
             total_added += new_entries
-            if total_added >= 5000:
+            if total_added >= 10000:
                 break
-            if entries % 10 == 0:
+            if total_found >= 100000:
                 break
         downloader.print_stats()
         await asyncio.sleep(interval)
@@ -251,7 +254,7 @@ def _parse_args():
     parser.add_argument('--input_dir', type=str, default='data/parser/lists/')
     parser.add_argument('--download_dir', type=str, default='data/parser/articles/')
     parser.add_argument('--log_dir', type=str, default='data/parser/logs/')
-    parser.add_argument('--interval', type=int, default=10)
+    parser.add_argument('--interval', type=int, default=1)
     parser.add_argument('--test-server', type=bool, default=False)
 
     return parser.parse_args()

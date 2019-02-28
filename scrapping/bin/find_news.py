@@ -5,16 +5,18 @@ from pathlib import Path
 
 import feedparser
 
-from .parse_news import get_html_links
-from .store import Downloader, PageStore, is_same_site, FileStore, build_dpid, RobotsParser
+from scrapping.uniscrape.htmls import get_html_links
+from scrapping.uniscrape.links import save_links
+from scrapping.uniscrape.store import Downloader, PageStore, FileStore, RobotsParser
 
 FEEDS = 'data/parser/conf/feeds.csv'
 SOURCES = 'data/parser/conf/sources.csv'
 DOWNLOAD_ROOT = 'data/parser/articles'
 LISTS = Path('data/parser/lists/')
 
-CACHE_TIME = 60 * 10
+CACHE_TIME = 60 * 5
 TEST_MODE = False
+
 
 def csv2string(rows):
     si = io.StringIO()
@@ -41,15 +43,19 @@ def load_feeds(downloader: Downloader):
             continue
 
         try:
-            feed = feedparser.parse(body)
+            feed = feedparser.parse(body.body)
+            # print(body[:100])
         except Exception as e:
             print(f"Error parsing page {feed_url}: {e}")
             continue
 
         for f in feed.entries:
             url = f.get('link', '')
-            if not url or url in urls or not is_same_site(url, site_url):
+            if not url or url in urls:
                 continue
+            # if not is_same_site(url, site_url) and not is_same_site(url, feed_url):
+            #    print("Url", url, "failed check with", site_url, 'for feed', feed_url)
+            #    continue
             urls.add(url)
             pub = time.strftime('%Y-%m-%dT%H:%M:%S', f.published_parsed)
             meta = csv2string({
@@ -59,6 +65,7 @@ def load_feeds(downloader: Downloader):
                 'published': pub,
                 'feed_url': feed_url
             })
+            # print("Saving meta for", url, "at", build_path(url, 'meta.gz'))
             downloader.page_store.save_url(url, meta, 'meta')
     return urls
 
@@ -107,12 +114,7 @@ def main():
         urls.add(url)
 
     if urls:
-        dt, tm = build_dpid().split('-', 1)
-        fn = f'{dt}/feeds-{tm}.txt'
-        path = LISTS / fn
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with open(LISTS / fn, 'w') as f:
-            f.write('\n'.join(sorted(urls)))
+        fn = save_links(LISTS, urls)
         print(f"Saved as {fn}")
     else:
         print("No urls.")

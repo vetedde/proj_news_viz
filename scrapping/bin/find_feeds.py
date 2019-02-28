@@ -5,7 +5,7 @@ import urllib.parse
 import feedparser
 from bs4 import BeautifulSoup
 
-from .store import Downloader
+from scrapping.uniscrape.store import Downloader
 
 # Create a csv table with source name|URL|feed url
 SOURCES = 'data/parser/conf/sources.csv'
@@ -45,33 +45,11 @@ def extract_feed_links(base_url, html):
             traceback.print_exc()
 
 
-def get_sites():
-    with open(SOURCES, encoding='utf-8') as sources:
-        reader = csv.reader(sources, delimiter='\t')
-        data = list(reader)
-
-    print(f"Found {len(data)} sites.")
-
-    for row in data[1:]:
-        if len(row) < 2:
-            continue
-        name = row[0]
-        site = row[1]
-        if '.' not in site:
-            print(f"Skipping bad site: {site}")
-            continue
-        if '://' in site:
-            yield name, site
-        else:
-            yield name, 'http://' + site
-            yield name, 'https://' + site
-
-
 def main():
     feeds = []
     links = set()
     d = Downloader(None)
-    for name, site in get_sites():
+    for name, site in get_sites(SOURCES):
         print(f"Fetching RSS for {name} at {site}")
         try:
             base_url, body = d.download_url(site)

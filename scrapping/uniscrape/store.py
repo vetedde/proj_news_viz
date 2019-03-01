@@ -172,9 +172,7 @@ def build_dpid():
 
 
 def build_dpid_slash():
-    fpath = build_dpid().replace('-', '/', 1)
-    os.makedirs(fpath, exist_ok=True)
-    return fpath
+    return build_dpid().replace('-', '/', 1)
 
 
 def main():

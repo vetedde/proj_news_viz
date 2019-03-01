@@ -11,10 +11,10 @@ from aiohttp import web, ClientSession
 from fake_useragent import UserAgent
 
 from scrapping.uniscrape.conf import BAD_EXT, LISTS
-from scrapping.uniscrape.globals import is_allowed, is_good_url, can_fetch, get_store
+from scrapping.uniscrape.globals import can_fetch, get_store, is_all_cool
 from scrapping.uniscrape.links import LinksFolder
 from scrapping.uniscrape.sites import get_hostname
-from scrapping.uniscrape.store import PageStore, Page, build_dpid, build_dpid_slash
+from scrapping.uniscrape.store import PageStore, Page, build_dpid_slash
 
 
 class Entry:
@@ -49,6 +49,7 @@ class Logger:
         if self.log_file:
             self.log_file.close()
         log_fpath = self.log_root / build_dpid_slash()
+        log_fpath.parent.mkdir(parents=True, exist_ok=True)
         self.log_file = open(str(log_fpath) + '.csv', 'w', newline='')
 
     def log(self, entry: Entry, status: str):
@@ -110,7 +111,7 @@ class Host:
                         # already downloaded
                         pass
                     elif status == 'forbidden':
-                        #print(f"Forbidden by robots.txt: {entry.url}")
+                        # print(f"Forbidden by robots.txt: {entry.url}")
                         self.logger.log(entry, 'forbidden')
                     elif status == 'error':
                         if entry.attempts < 2:
@@ -189,9 +190,7 @@ async def watch_file(lists_dir: Path, downloader, interval):
             for url in urls:
                 if not url:
                     continue
-                if not is_allowed(url):
-                    continue
-                if not is_good_url(url):
+                if not is_all_cool(url):
                     continue
                 entry = Entry(url)
                 if not entry.host:

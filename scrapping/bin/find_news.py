@@ -5,7 +5,7 @@ from pathlib import Path
 import feedparser
 
 from scrapping.uniscrape.globals import is_all_cool
-from scrapping.uniscrape.htmls import get_html_links
+from scrapping.uniscrape.htmls import get_html_links, csv2string
 from scrapping.uniscrape.links import save_links
 from scrapping.uniscrape.store import Downloader, PageStore, FileStore
 

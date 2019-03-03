@@ -33,6 +33,8 @@ def clean_text(text):
     text = re.sub("[0-9]|[-—.,:;_%©«»?*!@#№$^•·&()]|[+=]|[[]|[]]|[/]|[\"]", '', text)
     text = re.sub(r"\r\n\t|\n|\\s|\r\t|\\n", ' ', text)
     text = re.sub(r'[\xad]|[\s+]', ' ', text.strip())
+    text = re.sub(r"\\", '', text)
+    
 
     return text
 

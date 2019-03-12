@@ -6,7 +6,8 @@ from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 
 class InterfaxSpider(NewsSpider):
     name = "interfax"
-    start_urls = ["https://www.interfax.ru/news/2008/02/11"]
+
+    start_urls = ["https://www.interfax.ru/news/{}".format(datetime.datetime.today().strftime("%Y/%m/%d"))]
     config = NewsSpiderConfig(
         title_path='//h1/text()',
         date_path='//div[contains(@class, "tMC_head")]/meta[contains(@itemprop, "datePublished")]/@content',
@@ -16,12 +17,13 @@ class InterfaxSpider(NewsSpider):
     )
 
     def parse(self, response):
-        today = datetime.datetime.today()
-        first_day = datetime.datetime(year=2008, month=2, day=11)
-        date_range = [first_day + datetime.timedelta(days=x) for x in range((today-first_day).days)]
-        for date in date_range:
-            url = "https://www.interfax.ru/news/" + date.strftime("%Y/%m/%d")
+        page_date = datetime.datetime.today().date()
+
+        while page_date >= self.until_date:
+            url = "https://www.interfax.ru/news/" + page_date.strftime("%Y/%m/%d")
             yield response.follow(url, self.parse_page)
+
+            page_date -= datetime.timedelta(days=1)
 
     def parse_page(self, response):
         url = response.url

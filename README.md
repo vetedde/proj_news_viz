@@ -10,7 +10,7 @@
 │       ├── conf       # feeds.csv, sources.csv , ...
 │       └── lists      # download_urls.txt , processed_urls.txt , ...
 ├── README.md
-├── scrapping          # скрипты для скраппинга
+├── scraping          # скрипты для скрапинга
 ├── nlp                # скрипты и тетрадки по nlp
 │   ├── lemmatizers   # сравнение лемматизаторов
 │   ├── preprocessing   # скрипты для предобработки сырых текстов
@@ -50,6 +50,6 @@ Python 3.6+
 
 ## Скрипты:
 
-- scrapping/downloader.py : скачивает страницы из списков, находящихся в data/parser/lists/*.txt
-- scrapping/find_feeds.py : заходит на сайты, находит все RSS на них и сохраняет в data/parser/conf/feeds.csv
-- scrapping/find_news.py : проходит по списку RSS и главных страниц и сохраняет все найденные ссылки
+- scraping/downloader.py : скачивает страницы из списков, находящихся в data/parser/lists/*.txt
+- scraping/find_feeds.py : заходит на сайты, находит все RSS на них и сохраняет в data/parser/conf/feeds.csv
+- scraping/find_news.py : проходит по списку RSS и главных страниц и сохраняет все найденные ссылки

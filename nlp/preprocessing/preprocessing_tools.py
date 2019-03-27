@@ -4,11 +4,8 @@ import re
 from razdel import tokenize # pip install razdel # https://github.com/natasha/razdel
 import pymorphy2 # pip install pymorphy2
 morph = pymorphy2.MorphAnalyzer()
+from nltk.corpus import stopwords
 
-stopword_ru = [] #stopwords.words('russian')
-with open('stopwords.txt', 'r', encoding='utf-8') as f:
-    for w in f.readlines():
-        stopword_ru.append(re.sub('\n','',w))
 
 cache = {}  # для кеша лемм
 
@@ -16,13 +13,13 @@ cache = {}  # для кеша лемм
 def clean_text(text):
     '''
     очистка текста
-        
+
     на выходе - очищенный текст
     '''
-    
+
     if not isinstance(text, str):
         text = str(text)
-    
+
     text = text.lower()
     text = text.strip('\n').strip('\r').strip('\t')
 
@@ -31,11 +28,13 @@ def clean_text(text):
     text = re.sub("[0-9]|[-—.,:;_%©«»?*!@#№$^•·&()]|[+=]|[[]|[]]|[/]|[\"]", '', text)
     text = re.sub(r"\r\n\t|\n|\\s|\r\t|\\n", ' ', text)
     text = re.sub(r'[\xad]|[\s+]', ' ', text.strip())
+    text = re.sub(r"\\", '', text)
+
 
     return text
 
 
-def lemmatization(text):
+def lemmatization(text, stopword):
     '''
     лемматизация
         [0] если зашел тип не `str` делаем его `str`
@@ -45,14 +44,25 @@ def lemmatization(text):
         [4] проверка есть ли данное слово в кэше
         [5] лемматизация слова
         [6] проверка на стоп-слова
-        
+
     на выходе - лист отлемматизированых токенов
     '''
-    
+    # stopwords can be given as a list of stopwords or as a path to a file
+    if isinstance(stopword, str):
+        stopword_ru = [] #stopwords.words('russian')
+        with open(stopword, 'r', encoding='utf-8') as f:
+            for w in f.readlines():
+                stopword_ru.append(re.sub('\n','',w))
+            f.close()
+    elif isinstance(stopword, list):
+        stopword_ru = stopword
+    else:
+        raise ValueError('stopword data type is not recognized, possible types: str (path to file), list')
+
     # [0]
     if not isinstance(text, str):
         text = str(text)
-    
+
     # [1]
     tokens = list(tokenize(text))
     words = [_.text for _ in tokens]

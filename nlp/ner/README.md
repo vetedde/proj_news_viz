@@ -24,5 +24,5 @@ print(cn.replaceKeywords(text))
 
 p.s.
 
-* data take from [this](https://github.com/ods-ai-ml4sg/proj_news_viz/blob/master/nlp/ner/print(cm.replace_keywords(text)))
+* data take from [this](https://docs.google.com/spreadsheets/d/1dtZHVICQ7yUVfUKKPduJRvSwZEq1ArRNsG2Edzs5pjU/edit#gid=354394066)
 * about flashtext u can read [this](https://github.com/vi3k6i5/flashtext)

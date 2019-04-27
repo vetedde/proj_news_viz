@@ -18,7 +18,8 @@ class RbcSpider(NewsSpider):
         date_format='%Y-%m-%d %H:%M:%S',
         text_path='(.//div[contains(@class, "article__text")])'
                   '/*[not(self::script) and not(self::div[@class="subscribe-infographic"])]//text()',
-        topics_path='(.//a[contains(@class, "article__header__category")])[1]//text()'
+        topics_path='(.//a[contains(@class, "article__header__category")])[1]//text()',
+        authors_path='//div[contains(@class, "article__authors")]/text()'
     )
 
     def parse(self, response):
@@ -54,6 +55,7 @@ class RbcSpider(NewsSpider):
             # If the article is located in "www.rbc.ru" url, then return it
             # (not "sportrbc.ru", "delovtb.rbc.ru" e t.c. because they have another html layout)
             if res['edition'][0] == '-':
+                res['authors'] = [i.replace('\n', '').strip() for i in res['authors'] if i.replace('\n', '').strip()]
                 res['text'] = [i.replace('\xa0', ' ') for i in res['text']]
 
                 yield res

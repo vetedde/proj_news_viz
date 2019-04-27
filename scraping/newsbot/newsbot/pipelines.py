@@ -17,6 +17,7 @@ class NewsbotPipeline(object):
 
         item["title"] = spider.process_title(item["title"][0])
         item["topics"] = item["topics"][0]
+        item["authors"] = ','.join(item.get("authors", [""]))
         item["edition"] = item["edition"][0]
         item["url"] = item["url"][0]
         item["text"] = spider.process_text(item["text"])
@@ -25,7 +26,7 @@ class NewsbotPipeline(object):
         # Filtering out too late items
         if dt.date() >= spider.until_date:
             line = (item["date"], item["url"], item["edition"], '"' + item["topics"] + '"',
-                    '"' + item["title"] + '"', '"' + item["text"] + '"' + '\n')
+                    '"' + item["authors"] + '"', '"' + item["title"] + '"', '"' + item["text"] + '"' + '\n')
             line = ",".join(line)
             self.file.write(line)
 

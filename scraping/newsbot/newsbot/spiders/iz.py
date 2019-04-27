@@ -14,7 +14,9 @@ class IzSpider(NewsSpider):
         date_path='//div[contains(@class, "article_page__left__top__time__label")]/div/time/@datetime',
         date_format="%Y-%m-%dT%H:%M:%SZ",
         text_path='//div[contains(@itemprop, "articleBody")]/div/p//text()',
-        topics_path='//div[contains(@class, "rubrics_btn")]/div/a/text()')
+        topics_path='//div[contains(@class, "rubrics_btn")]/div/a/text()',
+        authors_path='_'
+    )
       
     visited_urls = []
     main_pub_d_xpath = '//div[contains(@class, "lenta_news__day__list__item__time")]/time/@datetime'

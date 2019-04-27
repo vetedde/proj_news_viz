@@ -13,4 +13,5 @@ class Document(scrapy.Item):
     url = scrapy.Field()
     edition = scrapy.Field()
     topics = scrapy.Field()
+    authors = scrapy.Field()
 

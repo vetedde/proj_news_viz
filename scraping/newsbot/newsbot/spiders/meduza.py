@@ -23,7 +23,8 @@ class MeduzaSpider(NewsSpider):
         date_path='_',
         date_format='%Y-%m-%d %H:%M:%S',
         text_path='_',
-        topics_path='_'
+        topics_path='_',
+        authors_path='_'
     )
 
     def parse(self, response):
@@ -88,6 +89,7 @@ class MeduzaSpider(NewsSpider):
         l.add_value('topics', '')
         l.add_value('date', datetime.utcfromtimestamp(news_item['datetime']).strftime(self.config.date_format))
         l.add_value('text', text_paragraphs if text_paragraphs else [''])
+        l.add_value('authors', news_item['source']['name'] if 'source' in news_item else [''])
 
         yield l.load_item()
 

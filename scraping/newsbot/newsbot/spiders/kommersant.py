@@ -24,8 +24,9 @@ class KommersantSpider(NewsSpider):
         title_path='(.//*[@class="article_name"])[1]//text()',
         date_path='//meta[contains(@property, "published_time")]/@content',
         date_format='%Y-%m-%dT%H:%M:%S%z',  # 2019-03-09T12:03:10+03:00
-        text_path='//p[contains(@class, "b-article__text")]//text()',
-        topics_path='//meta[contains(@name, "category")]/@content'
+        text_path='//p[@class="b-article__text"]//text()',
+        topics_path='//meta[contains(@name, "category")]/@content',
+        authors_path='//p[contains(@class, "document_authors")]//text()'
     )
     news_le = LinkExtractor(restrict_xpaths='//div[@class="archive_result__item_text"]')
 

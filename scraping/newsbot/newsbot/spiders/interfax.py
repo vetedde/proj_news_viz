@@ -13,7 +13,8 @@ class InterfaxSpider(NewsSpider):
         date_path='//div[contains(@class, "tMC_head")]/meta[contains(@itemprop, "datePublished")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
         text_path='//article//text()',
-        topics_path='//div[contains(@class, "textML")]/a/text()'
+        topics_path='//div[contains(@class, "textML")]/a/text()',
+        authors_path='_'
     )
 
     def parse(self, response):

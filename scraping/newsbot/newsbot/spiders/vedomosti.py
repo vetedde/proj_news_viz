@@ -16,7 +16,8 @@ class VedomostiSpider(NewsSpider):
         date_path='//time[@class="b-newsline-item__time"]/@pubdate',
         date_format='%Y-%m-%d %H:%M:%S %z',  # 2019-03-02 20:08:47 +0300
         text_path='(.//div[contains(@class, "b-news-item__text")])[1]/p//text()',
-        topics_path='(.//div[contains(@class, "io-category")])[1]/text()'
+        topics_path='(.//div[contains(@class, "io-category")])[1]/text()',
+        authors_path='_'
     )
     news_le = LinkExtractor(restrict_xpaths='//div[contains(@class, "b-newsline-item__title")]')
 

@@ -14,7 +14,8 @@ class RussiaTodaySpider(NewsSpider):
         date_path='//meta[contains(@name, "mediator_published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
         text_path='//div[contains(@class, "article__text")]//text()',
-        topics_path='//meta[contains(@name, "mediator_theme")]/@content'
+        topics_path='//meta[contains(@name, "mediator_theme")]/@content',
+        authors_path='_'
     )
     news_le = LinkExtractor(restrict_css='div.listing__card div.card__heading')
     page_le = LinkExtractor(restrict_css='div.listing__button.listing__button_js',

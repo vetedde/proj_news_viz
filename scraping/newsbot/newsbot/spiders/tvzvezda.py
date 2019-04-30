@@ -10,7 +10,9 @@ class TvZvezdaSpider(NewsSpider):
         date_path='//div[contains(@class, "date_news")]//text()',
         date_format="%H:%M %d.%m.%Y",
         text_path='//div[contains(@class, "glav_text")]//text()',
-        topics_path='//meta[contains(@property, "article:section")]/@content')
+        topics_path='//meta[contains(@property, "article:section")]/@content',
+        authors_path='//div[contains(@class, "autor_news")]/a/text()'
+    )
     news_le = LinkExtractor(restrict_css='div.js-ajax-receiver a.news_one')
 
     z=0

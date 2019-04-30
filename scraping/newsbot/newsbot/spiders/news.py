@@ -8,12 +8,13 @@ from newsbot.items import Document
 
 
 class NewsSpiderConfig:
-    def __init__(self, title_path, date_path, date_format, text_path, topics_path):
+    def __init__(self, title_path, date_path, date_format, text_path, topics_path, authors_path):
         self.title_path = title_path
         self.date_path = date_path
         self.date_format = date_format
         self.text_path = text_path
         self.topics_path = topics_path
+        self.authors_path = authors_path
 
 
 class NewsSpider(scrapy.Spider):
@@ -24,6 +25,7 @@ class NewsSpider(scrapy.Spider):
         assert self.config.date_format
         assert self.config.text_path
         assert self.config.topics_path
+        assert self.config.authors_path
 
         # Trying to parse 'until_date' param as date
         if 'until_date' in kwargs:
@@ -46,6 +48,7 @@ class NewsSpider(scrapy.Spider):
         l.add_xpath('date', self.config.date_path)
         l.add_xpath('text', self.config.text_path)
         l.add_xpath('topics', self.config.topics_path)
+        l.add_xpath('authors', self.config.authors_path)
         yield l.load_item()
 
     def process_title(self, title):

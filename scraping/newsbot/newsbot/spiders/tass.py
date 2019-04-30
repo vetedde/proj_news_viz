@@ -19,7 +19,8 @@ class RussiaTassSpider(NewsSpider):
         date_path='_',
         date_format="%Y-%m-%d %H:%M:%S",
         text_path="div.text-content>div.text-block ::text",
-        topics_path='_'
+        topics_path='_',
+        authors_path='_'
     )
     custom_settings = {
         "DEPTH_LIMIT": 4,

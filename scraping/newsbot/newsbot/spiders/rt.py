@@ -1,44 +1,72 @@
-import datetime
-import scrapy
-from newsbot.items import Document
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
-from scrapy.linkextractors import LinkExtractor
-from urllib.parse import urlsplit
+from scrapy import Request, Selector
+
+from typing import List
+from datetime import date
 
 
 class RussiaTodaySpider(NewsSpider):
-    name = "rt"
-    start_urls = ["https://russian.rt.com/news"]
+    name = 'rt'
+
+    start_urls = ['https://russian.rt.com/sitemap.xml']
+
     config = NewsSpiderConfig(
         title_path='//h1/text()',
-        date_path='//meta[contains(@name, "mediator_published_time")]/@content',
+        date_path='//meta'
+        '[contains(@name, "mediator_published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
         text_path='//div[contains(@class, "article__text")]//text()',
-        topics_path='//meta[contains(@name, "mediator_theme")]/@content',
+        topics_path='//meta'
+        '[contains(@name, "mediator_theme")]/@content',
         authors_path='_'
     )
-    news_le = LinkExtractor(restrict_css='div.listing__card div.card__heading')
-    page_le = LinkExtractor(restrict_css='div.listing__button.listing__button_js',
-                            tags=['div'], attrs=['data-href'])
-    max_page_depth = 4
 
     def parse(self, response):
-        if response.meta.get("page_depth", 1) < self.max_page_depth:
-            for link in self.page_le.extract_links(response):
-                yield scrapy.Request(url=link.url,
-                                     priority=100,
-                                     callback=self.parse,
-                                     meta={"page_depth": response.meta.get("page_depth", 1) + 1}
-                                     )
+        """Parse first main sitemap.xml by initial parsing method.
+        Getting sub_sitemaps.
+        """
+        body = response.body
+        links = Selector(text=body).xpath('//loc/text()').getall()
 
-        for link in self.news_le.extract_links(response):
-            yield scrapy.Request(url=link.url, callback=self.parse_document)
+        for link in links:
+            yield Request(url=link,
+                          callback=self.parse_sitemap)
+
+    def parse_sitemap(self, response):
+        """Parse each sub_sitemap.
+        """
+        body = response.body
+        links = Selector(text=body).xpath('//loc/text()').getall()
+
+        for link in links:
+            yield Request(url=link,
+                          callback=self.parse_document)
+
+    def _fix_syntax(self, sample: List[str], idx_split: int) -> List[str]:
+        """Fix timestamp syntax, droping timezone postfix.
+        """
+        sample = [sample[0][:idx_split]]
+        return sample
+
+    def _get_date(self, lst: List[str]):
+        """Convert list into date obj.
+        """
+        y, m, d = [int(num) for num in lst]
+        return date(y, m, d)
 
     def parse_document(self, response):
-        for res in super().parse_document(response):
-            if isinstance(res, Document):
-                if isinstance(res["date"], list):
-                    res["date"] = [x[:-6] for x in res["date"] if x]
-                else:
-                    res["date"] = res["date"][:-6]
-            yield res
+        """Final parsing method.
+        Parse each article."""
+        for item in super().parse_document(response):
+
+            # Try to drop timezone postfix.
+            try:
+                item['date'] = self._fix_syntax(item['date'], -6)
+            except KeyError:
+                print('Error. No date value.')
+            else:
+                raw_date = item['date'][0][:10].split('-')
+                processed_date = self._get_date(raw_date)
+
+                if processed_date >= self.until_date:
+                    yield item

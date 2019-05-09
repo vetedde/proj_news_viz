@@ -16,9 +16,17 @@ class RussiaTodaySpider(NewsSpider):
         '[contains(@name, "mediator_published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
         text_path='//div[contains(@class, "article__text")]//text()',
-        topics_path='//meta'
-        '[contains(@name, "mediator_theme")]/@content',
-        authors_path='_'
+        topics_path='//meta[contains(@name, "mediator_theme")]/@content',
+        authors_path='_',
+        reposts_fb_path='_',
+        reposts_vk_path='_',
+        reposts_ok_path='_',
+        reposts_twi_path='_',
+        reposts_lj_path='_',
+        reposts_tg_path='_',
+        likes_path='_',
+        views_path='_',
+        comm_count_path='_'
     )
 
     def parse(self, response):

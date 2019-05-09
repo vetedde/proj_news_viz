@@ -19,7 +19,16 @@ class RbcSpider(NewsSpider):
         text_path='(.//div[contains(@class, "article__text")])'
                   '/*[not(self::script) and not(self::div[@class="subscribe-infographic"])]//text()',
         topics_path='(.//a[contains(@class, "article__header__category")])[1]//text()',
-        authors_path='//div[contains(@class, "article__authors")]/text()'
+        authors_path='//div[contains(@class, "article__authors")]/text()',
+        reposts_fb_path='_',
+        reposts_vk_path='_',
+        reposts_ok_path='_',
+        reposts_twi_path='_',
+        reposts_lj_path='_',
+        reposts_tg_path='_',
+        likes_path='_',
+        views_path='_',
+        comm_count_path='_'
     )
 
     def parse(self, response):

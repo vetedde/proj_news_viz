@@ -15,7 +15,16 @@ class IzSpider(NewsSpider):
         date_format="%Y-%m-%dT%H:%M:%SZ",
         text_path='//div[contains(@itemprop, "articleBody")]/div/p//text()',
         topics_path='//div[contains(@class, "rubrics_btn")]/div/a/text()',
-        authors_path='_'
+        authors_path='_',
+        reposts_fb_path='//li[contains(@class, "item_service_facebook")]//text()',
+        reposts_vk_path='//li[contains(@class, "item_service_vkontakte")]//text()',
+        reposts_ok_path='//li[contains(@class, "item_service_odnoklassniki")]//text()',
+        reposts_twi_path='//li[contains(@class, "item_service_twitter")]//text()',
+        reposts_lj_path='_',
+        reposts_tg_path='_',
+        likes_path='_',
+        views_path='//div[contains(@id, "viewsCounter")]//text()',
+        comm_count_path='_'
     )
       
     visited_urls = []

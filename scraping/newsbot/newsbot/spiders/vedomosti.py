@@ -17,7 +17,16 @@ class VedomostiSpider(NewsSpider):
         date_format='%Y-%m-%d %H:%M:%S %z',  # 2019-03-02 20:08:47 +0300
         text_path='(.//div[contains(@class, "b-news-item__text")])[1]/p//text()',
         topics_path='(.//div[contains(@class, "io-category")])[1]/text()',
-        authors_path='_'
+        authors_path='_',
+        reposts_fb_path='_',
+        reposts_vk_path='_',
+        reposts_ok_path='_',
+        reposts_twi_path='_',
+        reposts_lj_path='_',
+        reposts_tg_path='_',
+        likes_path='_',
+        views_path='_',
+        comm_count_path='_'
     )
     news_le = LinkExtractor(restrict_xpaths='//div[contains(@class, "b-newsline-item__title")]')
 

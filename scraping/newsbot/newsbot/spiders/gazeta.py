@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from scrapy.linkextractors import LinkExtractor
 from scrapy import Request, Selector
 
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
@@ -18,11 +17,17 @@ class GazetaSpider(NewsSpider):
         text_path='//div[contains(@itemprop, "articleBody")]//p//text() | '
                   '//span[contains(@itemprop, "description")]//text()',
         topics_path='//div[contains(@class, "active")]/a/span/text()',
-        authors_path='//span[contains(@itemprop, "author")]//text()'
+        authors_path='//span[contains(@itemprop, "author")]//text()',
+        reposts_fb_path='_',
+        reposts_vk_path='_',
+        reposts_ok_path='_',
+        reposts_twi_path='_',
+        reposts_lj_path='_',
+        reposts_tg_path='_',
+        likes_path='_',
+        views_path='_',
+        comm_count_path='_'
     )
-    sitemap_le = LinkExtractor(restrict_xpaths='//div[contains(@class, "sitemap_list")]/ul/ul')
-    articles_le = LinkExtractor(restrict_xpaths='//h2[contains(@itemprop, "headline")]')
-    news_le = LinkExtractor(restrict_css='div.article_text h1.txt_2b')
 
     def parse(self, response):
         # Parse main sitemap

@@ -1,14 +1,18 @@
-import scrapy
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
-from scrapy.linkextractors import LinkExtractor
 from datetime import datetime
+
+from scrapy.linkextractors import LinkExtractor
+from scrapy import Request, Selector
+
+from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 
 
 class GazetaSpider(NewsSpider):
     name = 'gazeta'
-    start_urls = ['https://www.gazeta.ru/sitemap.shtml']
+    start_urls = ['https://www.gazeta.ru/sitemap.xml']
+
     config = NewsSpiderConfig(
-        title_path='//h1/text()',
+        title_path='//div[contains(@itemprop, "alternativeHeadline")]//text() | '
+                   '//h1/text()',
         date_path='//time[contains(@itemprop, "datePublished")]/@datetime',
         date_format='%Y-%m-%dT%H:%M:%S%z',
         text_path='//div[contains(@itemprop, "articleBody")]//p//text() | '
@@ -21,33 +25,44 @@ class GazetaSpider(NewsSpider):
     news_le = LinkExtractor(restrict_css='div.article_text h1.txt_2b')
 
     def parse(self, response):
-        for link in self.sitemap_le.extract_links(response):
-            yield scrapy.Request(url=link.url, callback=self.parse_page)
+        # Parse main sitemap
+        body = response.body
+        links = Selector(text=body).xpath('//loc/text()').getall()
+        last_modif_dts = Selector(text=body).xpath('//lastmod/text()').getall()
 
-    def parse_page(self, response):
-        if 'news' in response.url:
-            links = self.news_le.extract_links(response)
-        else:
-            links = self.articles_le.extract_links(response)
+        for link, last_modif_dt in zip(links, last_modif_dts):
+            # Convert last_modif_dt to datetime
+            last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
 
-        pub_dts = response.xpath(self.config.date_path).extract()
-        for pub_dt, link in zip(pub_dts, links):
-            pub_dt = pub_dt[:-3] + pub_dt[-3:].replace(':', '')  # remove ":" for timezone correct parsing
-            pub_dt = datetime.strptime(pub_dt, self.config.date_format)
+            if last_modif_dt.date() >= self.until_date:
+                yield Request(url=link, callback=self.parse_sub_sitemap)
 
-            if pub_dt.date() >= self.until_date:
-                yield scrapy.Request(url=link.url, callback=self.parse_document)
+    def parse_sub_sitemap(self, response):
+        # Parse sub sitemaps
+        body = response.body
+        links = Selector(text=body).xpath('//loc/text()').getall()
+        last_modif_dts = Selector(text=body).xpath('//lastmod/text()').getall()
 
-        # Determine if this is the last page
-        if pub_dt.date() >= self.until_date:
-            # Forming the next page link
-            link_url = '{}?p=page&d={}'.format(self.start_urls[0], pub_dt.strftime('%d.%m.%Y_%H:%M'))
+        for link, last_modif_dt in zip(links, last_modif_dts):
+            # Convert last_modif_dt to datetime
+            last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
 
-            yield scrapy.Request(url=link_url,
-                                 priority=100,
-                                 callback=self.parse,
-                                 meta={'page_depth': response.meta.get('page_depth', 1) + 1}
-                                 )
+            if last_modif_dt.date() >= self.until_date:
+                yield Request(url=link, callback=self.parse_articles_sitemap)
+
+    def parse_articles_sitemap(self, response):
+        # Parse sub sitemaps
+        body = response.body
+        links = Selector(text=body).xpath('//loc/text()').getall()
+        last_modif_dts = Selector(text=body).xpath('//lastmod/text()').getall()
+
+        for link, last_modif_dt in zip(links, last_modif_dts):
+            # Convert last_modif_dt to datetime
+            last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
+
+            if last_modif_dt.date() >= self.until_date:
+                if link.endswith('.shtml') and not link.endswith('index.shtml'):
+                    yield Request(url=link, callback=self.parse_document)
 
     def parse_document(self, response):
         for res in super().parse_document(response):

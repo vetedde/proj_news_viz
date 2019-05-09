@@ -37,3 +37,4 @@ media/
 *.jl.gz
 .releases
 
+*.log

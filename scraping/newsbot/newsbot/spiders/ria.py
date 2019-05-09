@@ -17,7 +17,16 @@ class RiaSpider(NewsSpider):
         date_format='%Y-%m-%dT%H:%MZ',
         text_path='//div[contains(@class, "article__block") and @data-type = "text"]//text()',
         topics_path='//a[contains(@class, "article__tags-item")]/text()',
-        authors_path='_'
+        authors_path='_',
+        reposts_fb_path='_',
+        reposts_vk_path='_',
+        reposts_ok_path='_',
+        reposts_twi_path='_',
+        reposts_lj_path='_',
+        reposts_tg_path='_',
+        likes_path='_',
+        views_path='_',
+        comm_count_path='_'
     )
     news_le = LinkExtractor(restrict_css='div.lenta__item')
 

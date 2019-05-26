@@ -1,6 +1,5 @@
 import datetime
 
-import scrapy
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 
 
@@ -9,12 +8,12 @@ class InterfaxSpider(NewsSpider):
 
     start_urls = ["https://www.interfax.ru/news/{}".format(datetime.datetime.today().strftime("%Y/%m/%d"))]
     config = NewsSpiderConfig(
-        title_path='//h1/text()',
-        date_path='//div[contains(@class, "tMC_head")]/meta[contains(@itemprop, "datePublished")]/@content',
-        date_format="%Y-%m-%dT%H:%M:%S",
-        text_path='//article//text()',
-        topics_path='//div[contains(@class, "textML")]/a/text()',
-        authors_path='_',
+        title_path='//h1[contains(@itemprop, "headline")]/text()',
+        date_path='//meta[contains(@property, "published_time")]/@content',
+        date_format="%Y-%m-%dT%H:%M%z",
+        text_path='//article[contains(@itemprop, "articleBody")]/p[not(contains(@itemprop, "author"))]//text()',
+        topics_path='//aside[contains(@class, "textML")]/a//text()',
+        authors_path='//p[contains(@itemprop, "author")]//text()',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',

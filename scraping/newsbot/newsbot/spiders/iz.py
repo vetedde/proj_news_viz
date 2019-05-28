@@ -34,9 +34,9 @@ class IzSpider(NewsSpider):
         """
         body = response.body
         links = Selector(text=body).xpath('//loc/text()').getall()
-        # Parse last sitemap xml number (in this case: "1"):
-        # https://iz.ru/export/sitemap/1/xml
-        sitemap_n = int(links[-1].split('sitemap/')[1][:-4])
+        # Parse last sitemap xml number
+        # (in this case: "1"): https://iz.ru/export/sitemap/1/xml
+        sitemap_n = int(links[-1].split('sitemap/')[1].split('/')[0])
 
         # Get last empty sitemap link (main "sitemap.xml" on this site isn't updated frequently enough)
         # by iterating sitemap links adding "number" to it
@@ -58,19 +58,18 @@ class IzSpider(NewsSpider):
             yield Request(url=link,
                           callback=self.parse_sitemap)
 
-            # Get last publication datetime from this sitemap
-            last_pub_dt = self._get_last_page_dt(link)
-
-            if last_pub_dt.date() < self.until_date:
-                break
-
     def parse_sitemap(self, response):
         # Parse sub sitemaps
         body = response.body
         links = Selector(text=body).xpath('//loc/text()').getall()
         last_modif_dts = Selector(text=body).xpath('//lastmod/text()').getall()
 
-        for link, last_modif_dt in zip(links, last_modif_dts):
+        # Sort news by modification date descending
+        news = [(link, last_modif_dt) for link, last_modif_dt in zip(links, last_modif_dts)]
+        sorted_news = sorted(news, key=lambda x: x[1], reverse=True)
+
+        # Iterate news and parse them
+        for link, last_modif_dt in sorted_news:
             # Convert last_modif_dt to datetime
             last_modif_dt = datetime.strptime(last_modif_dt, '%Y-%m-%d')
 

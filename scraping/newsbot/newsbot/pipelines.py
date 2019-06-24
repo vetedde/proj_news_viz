@@ -8,10 +8,10 @@ import datetime
 
 class NewsbotPipeline(object):
     def open_spider(self, spider):
-        self.file = open(spider.name + '.csv', 'w')
+        self.file = open(spider.name + '.csv', 'w', encoding='utf8')
 
         # Write header to the resulting file
-        self._fields = ["date", "url", "edition", "topics", "authors", "title", "text"]
+        self._fields = ["date", "url", "edition", "topics", "authors", "title", "text", "annot"]
         self._metrics = ["reposts_fb", "reposts_vk", "reposts_ok", "reposts_twi",
                          "reposts_lj", "reposts_tg", "likes", "views", "comm_count"]
         self.file.write(','.join(self._fields + self._metrics) + '\n')
@@ -29,6 +29,7 @@ class NewsbotPipeline(object):
         item["url"] = item["url"][0]
         item["text"] = spider.process_text(item["text"])
         item["date"] = dt.strftime("%Y-%m-%d %H:%M:%S")
+        item["annot"] = item["annot"][0]
 
         item = self._process_metrics(spider, item, self._metrics)
 
@@ -47,6 +48,7 @@ class NewsbotPipeline(object):
                     item["likes"],
                     item["views"],
                     item["comm_count"],
+                    '"' + item["annot"] + '"',
                     '\n')
             line = ",".join(line)
             self.file.write(line)

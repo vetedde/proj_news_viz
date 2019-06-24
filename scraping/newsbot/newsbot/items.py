@@ -23,5 +23,6 @@ class Document(scrapy.Item):
     likes = scrapy.Field()
     views = scrapy.Field()
     comm_count = scrapy.Field()
+    annot = scrapy.Field()
 
 

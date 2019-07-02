@@ -8,7 +8,7 @@ import scrapy
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 
 
-class TestSpider(NewsSpider):
+class MeduzaSpider(NewsSpider):
     name = 'meduza'
     page_link_tmpl = 'https://meduza.io/api/v3/search?chrono=news&page={}&per_page=24&locale=ru'
     article_link_tmpl  = 'https://meduza.io/{}'

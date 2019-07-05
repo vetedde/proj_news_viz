@@ -18,16 +18,13 @@ class MeduzaSpider(NewsSpider):
     fields = ['title', 'topics', 'authors', 'edition', 'url', 'text', 'date', ]
 
     config = NewsSpiderConfig(
-        title_path='//h1[@class="RichTitle-root"]/text() | //h1[@class="SimpleTitle-root"]/text() | ' +
-                   '//h1[@class="RichTitle-root RichTitle-slide"]/text()',
+        title_path='//h1[@class="RichTitle-root" or @class="SimpleTitle-root" or ' +
+                   '@class="RichTitle-root RichTitle-slide"]//text()',
         date_path='//time[@class="Timestamp-root"]/text()',
         date_format='%H:%M, %d %m %Y',
-        text_path='//p[@class="SimpleBlock-p"]/text() | //p[@class="SimpleBlock-lead SimpleBlock-slide"]/text() ' +
-                  '| //p[@class="SimpleBlock-lead SimpleBlock-center"]/text() |' +
-                  '//div[@class="MediaCaption-caption"]/text() | ' +
-                  '//p[@class="SimpleBlock-p SimpleBlock-center"]/text() |' +
-                  '//p[@class="SimpleBlock-lead SimpleBlock-center SimpleBlock-game"]/text() | ' +
-                  '//p[@class="SimpleBlock-lead"]/text()',
+        text_path='//div[@class="GeneralMaterial-article" or @class="SlidesMaterial-layout" ' +
+                  'or @class="MediaCaption-caption"]//p//text() | //div[@class="MediaCaption-caption"]//text() | ' +
+                  '//p[@class="SimpleBlock-p" or @class="SimpleBlock-lead"]//text()',
         topics_path='_',
         authors_path='_',
         reposts_fb_path='_',

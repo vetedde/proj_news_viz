@@ -8,7 +8,7 @@ import datetime
 
 class NewsbotPipeline(object):
     def open_spider(self, spider):
-        self.file = open(spider.name + '.csv', 'w')
+        self.file = open(spider.name + '.csv', 'w', encoding='utf8')
 
         # Write header to the resulting file
         self._fields = ["date", "url", "edition", "topics", "authors", "title", "text"]

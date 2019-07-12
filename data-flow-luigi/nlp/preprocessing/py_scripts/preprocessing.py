@@ -5,12 +5,14 @@ import sys
 import re
 import pymorphy2
 
+from pymystem3 import Mystem
 from nltk.corpus import stopwords
 from razdel import tokenize
 
 cache = dict()
 stopword_ru = stopwords.words('russian')
 morph = pymorphy2.MorphAnalyzer()
+mystem = Mystem()
 
 def clean_text(text):
     '''
@@ -65,4 +67,18 @@ def lemmatization(text):
                     temp_cach = cache[w] = morph.parse(w)[0].normal_form
                     words_lem.append(temp_cach)
     return words_lem
+
+
+def lemmatization_mystem(text):
+    if not isinstance(text, str):
+        text = str(text)
+    
+    lemmas = mystem.lemmatize(text)
+    
+    return [word for word in lemmas if len(word)>1]
+
+
+
+
+
 

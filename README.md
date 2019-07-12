@@ -1,5 +1,9 @@
-# proj_news_viz
+# proj_news_viz  
 
+## Что здесь происходит  
+https://github.com/ods-ai-ml4sg/proj_news_viz/wiki/Start-Page
+
+## Структура репозитория  
 
 ```bash
 .
@@ -20,10 +24,11 @@
 │           ├── gensim, bigartm, etc...
 ```
 
+
+
 ## Requirements
 
 Python 3.6+
-
 
 ## Порядок работы
 

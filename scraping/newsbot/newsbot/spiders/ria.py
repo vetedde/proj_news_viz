@@ -24,8 +24,8 @@ class RiaSpider(NewsSpider):
         reposts_twi_path='_',
         reposts_lj_path='_',
         reposts_tg_path='_',
-        likes_path='_',
-        views_path='_',
+        likes_path='//span[contains(@class,"m-value")]/text()',
+        views_path='//span[contains(@class,"statistic__item m-views")]/text()',
         comm_count_path='_'
     )
     news_le = LinkExtractor(restrict_css='div.lenta__item')

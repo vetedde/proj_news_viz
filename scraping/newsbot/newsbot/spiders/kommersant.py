@@ -35,7 +35,7 @@ class KommersantSpider(NewsSpider):
         reposts_tg_path='_',
         likes_path='_',
         views_path='_',
-        comm_count_path='_'
+        comm_count_path='//span[contains(@class, "comments-number hide1 hide2")]/text()'
     )
     news_le = LinkExtractor(restrict_xpaths='//div[@class="archive_result__item_text"]')
 

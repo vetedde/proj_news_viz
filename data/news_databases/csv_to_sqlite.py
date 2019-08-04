@@ -1,4 +1,3 @@
-import re 
 import csv
 import sqlite3
 import argparse

@@ -1,7 +1,7 @@
 # proj_news_viz  
 
 ## Что здесь происходит  
-https://github.com/ods-ai-ml4sg/proj_news_viz/wiki/Start-Page
+https://github.com/ods-ai-ml4sg/proj_news_viz/wiki
 
 ## Структура репозитория  
 

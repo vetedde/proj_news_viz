@@ -64,7 +64,8 @@ class RbcSpider(NewsSpider):
             # If the article is located in "www.rbc.ru" url, then return it
             # (not "sportrbc.ru", "delovtb.rbc.ru" e t.c. because they have another html layout)
             if res['edition'][0] == '-':
-                res['authors'] = [i.replace('\n', '').strip() for i in res['authors'] if i.replace('\n', '').strip()]
+                if 'authors' in res:
+                    res['authors'] = [i.replace('\n', '').strip() for i in res['authors'] if i.replace('\n', '').strip()]
                 res['text'] = [i.replace('\xa0', ' ') for i in res['text']]
 
                 yield res

@@ -4,7 +4,7 @@ from flashtext import KeywordProcessor # pip install flashtext
 
 class KeyProc:
     
-    with open('./data/cleaned_name.pickle', 'rb') as handle:
+    with open('../data/cleaned_name.pickle', 'rb') as handle:
         dict_cleaned_name = pickle.load(handle)
 
     def __init__(self, dict = dict_cleaned_name):
@@ -17,3 +17,4 @@ class KeyProc:
 
     def replaceKeywords(self, text):
         return self.kp.replace_keywords(text)
+    

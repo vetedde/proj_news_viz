@@ -2,9 +2,9 @@ replace persons
 ----
 
 by @vtrokhymenko:
-* vt-replace_persons.ipynb - how names was extracted
-* vt-replace_persons_test.ipynb - r&d extraction (don't use in prod)
-* replace_persons.py - the main file which u can use for using flashtext like this
+* `vt-replace_persons.ipynb` - how names was extracted
+* `vt-replace_persons_test.ipynb` - r&d extraction (don't use in prod)
+* `replace_persons.py` - the main file which u can use for using flashtext like this
 
 ```
 from replace_persons import KeyProc

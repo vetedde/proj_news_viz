@@ -20,7 +20,6 @@ source code for use in this project
 __________________
 how add PATH to jupyter:
 
-        ```
         import os
         import sys
         
@@ -30,7 +29,7 @@ how add PATH to jupyter:
 
         PATH = os.path.join(home_path, dir_project)
         sys.path.append(PATH)
-        ```
+
 __________________
 examples structure:
 ```

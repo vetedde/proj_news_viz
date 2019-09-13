@@ -23,7 +23,6 @@ how add PATH to jupyter:
         import os
         import sys
         
-        
         home_path = os.getenv('HOME') # create home directory
         dir_project = 'proj_news_viz/nlp/structure' # write your main proj directory 
 

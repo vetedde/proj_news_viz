@@ -4,13 +4,13 @@
 source code for use in this project
 
 ```
-├── autoTagging                <- Source code for use in this project.
-│   ├── __init__.py            <- Makes src a Python module
+├── news_viz                    <- Source code for use in this project.
+│   ├── __init__.py             <- Makes src a Python module
 │   │
-│   ├── ner                    <- Scripts to NER
+│   ├── ner                     <- Scripts to NER
 │   │   └── cleanedNames.py 
 │   │
-│   ├── data_processing        <- Scripts to process data
+│   ├── data_processing         <- Scripts to process data
 │   │   └── preprocessing_tools.py
 │   │
 │   ├── 

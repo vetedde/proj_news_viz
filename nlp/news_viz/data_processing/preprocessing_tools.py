@@ -1,83 +1,80 @@
-# coding: utf-8
+import html
 import re
-#from nltk.corpus import stopwords
-from razdel import tokenize # pip install razdel # https://github.com/natasha/razdel
-import pymorphy2 # pip install pymorphy2
+
+import pymorphy2  # pip install pymorphy2
+
 morph = pymorphy2.MorphAnalyzer()
-from nltk.corpus import stopwords
+
+import os
+import sys
+
+PATH = os.path.join(os.getenv('HOME'), 'proj_news_radar/proj_news_viz/nlp')
+sys.path.append(PATH)
+
+# read stopwords for RU
+try:
+    with open(f'{PATH}/data/another/stopwords.txt', "r") as file:
+        stopwords = file.read().splitlines()
+except FileNotFoundError:
+    stopwords = []
 
 
-cache = {}  # для кеша лемм
-
-
-def clean_text(text):
+def clean_text(text: str = None) -> str:
     '''
-    очистка текста
-
-    на выходе - очищенный текст
+    clean text, forsaking only tokens for clustering
+    
+    Parameters
+    ----------
+    text : string, default None
+        input text 
+        
+    Returns
+    -------
+    text : string
+        cleaned string text
     '''
 
     if not isinstance(text, str):
         text = str(text)
+
+    text = html.unescape(text)
 
     text = text.lower()
-    text = text.strip('\n').strip('\r').strip('\t')
-
-    text = re.sub("-\s\r\n\|-\s\r\n|\r\n", '', str(text))
-
-    text = re.sub("[0-9]|[-—.,:;_%©«»?*!@#№$^•·&()]|[+=]|[[]|[]]|[/]|[\"]", '', text)
-    text = re.sub(r"\r\n\t|\n|\\s|\r\t|\\n", ' ', text)
-    text = re.sub(r'[\xad]|[\s+]', ' ', text.strip())
-    text = re.sub(r"\\", '', text)
-
-
-    return text
-
-
-def lemmatization(text, stopword):
-    '''
-    лемматизация
-        [0] если зашел тип не `str` делаем его `str`
-        [1] токенизация предложения через razdel
-        [2] проверка есть ли в начале слова '-'
-        [3] проверка токена с одного символа
-        [4] проверка есть ли данное слово в кэше
-        [5] лемматизация слова
-        [6] проверка на стоп-слова
-
-    на выходе - лист отлемматизированых токенов
-    '''
-    # stopwords can be given as a list of stopwords or as a path to a file
-    if isinstance(stopword, str):
-        stopword_ru = [] #stopwords.words('russian')
-        with open(stopword, 'r', encoding='utf-8') as f:
-            for w in f.readlines():
-                stopword_ru.append(re.sub('\n','',w))
-            f.close()
-    elif isinstance(stopword, list):
-        stopword_ru = stopword
+    text = re.sub(r'[^а-яА-Я\-]+', ' ', text) # leave the Cyrillic alphabet
+    text = re.sub(r'(?<!\S).(?!\S)\s*', '', text) # remove the single characters
+    text = re.sub(r'\s+', ' ', text).strip() # remove the long blanks
+    
+    if len(text) < 3:
+        return '9999'
     else:
-        raise ValueError('stopword data type is not recognized, possible types: str (path to file), list')
+        return text
 
-    # [0]
+
+def lemmatization(text: str = None) -> str:
+    '''
+    lemmatization text 
+    
+    Parameters
+    ----------
+    input_text : string, default None
+        cleaned text
+        
+    Returns
+    -------
+    words_lem : string
+        lemmatized text
+    '''
+
     if not isinstance(text, str):
         text = str(text)
 
-    # [1]
-    tokens = list(tokenize(text))
-    words = [_.text for _ in tokens]
+    # get tokens from input text
+    # in this case it's normal approach because we hard cleaned text
+    tokens = text.split(' ')
 
-    words_lem = []
-    for w in words:
-        if w[0] == '-': # [2]
-            w = w[1:]
-        if len(w)>1: # [3]
-            if w in cache: # [4]
-                words_lem.append(cache[w])
-            else: # [5]
-                temp_cach = cache[w] = morph.parse(w)[0].normal_form
-                words_lem.append(temp_cach)
-
-    words_lem_without_stopwords = [i for i in words_lem if not i in stopword_ru] # [6]
-
-    return words_lem_without_stopwords
+    words_lem = [morph.parse(token)[0].normal_form for token in tokens if token not in stopwords]
+    
+    if len(words_lem) < 3:
+        return '9999'
+    else:
+         return ' '.join(words_lem)

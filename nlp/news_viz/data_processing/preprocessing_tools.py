@@ -65,6 +65,8 @@ def lemmatization(text: str = None) -> str:
         lemmatized text
     '''
 
+    # get tokens from input text
+    # in this case it's normal approach because we hard cleaned text
     if not isinstance(text, str):
         text = str(text)
 

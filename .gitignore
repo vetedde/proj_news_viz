@@ -135,5 +135,5 @@ nlp/notebooks/topic_models/separateTopics/compare/data/interfax/batches/*
 
 !nlp/topic_models/separateTopics/lenta/data/topicsProbability/*
 
-# disable ignored
+# disable ignore
 !README.*

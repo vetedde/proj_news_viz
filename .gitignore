@@ -104,14 +104,16 @@ venv.bak/
 .mypy_cache/
 
 # data
+.csv
+*.csv.bz2
+.pickle
+*.batch
+*.vw
 
-# separateTopics
+# bigartm
 bigartm.ERROR*
 bigartm.INFO*
 bigartm.WARNING*
-*.csv.bz2
-*.batch
-*.vw
 bigartm.data-MS-*
 
 # at folder nlp

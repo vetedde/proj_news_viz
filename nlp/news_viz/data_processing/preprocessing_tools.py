@@ -21,7 +21,7 @@ except FileNotFoundError:
 
 def clean_text(text: str = None) -> str:
     '''
-    clean text, forsaking only tokens for clustering
+    clean text, leaving only tokens for clustering
     
     Parameters
     ----------
@@ -40,10 +40,10 @@ def clean_text(text: str = None) -> str:
     text = html.unescape(text)
 
     text = text.lower()
-    text = re.sub(r'[^а-яА-Я\-]+', ' ', text) # leave the Cyrillic alphabet
-    text = re.sub(r'(?<!\S).(?!\S)\s*', '', text) # remove the single characters
-    text = re.sub(r'\s+', ' ', text).strip() # remove the long blanks
-    
+    text = re.sub(r'[^а-яА-Я\-]+', ' ', text)  # leave the Cyrillic alphabet
+    text = re.sub(r'(?<!\S).(?!\S)\s*', '', text)  # remove the single characters
+    text = re.sub(r'\s+', ' ', text).strip()  # remove the long blanks
+
     if len(text) < 3:
         return '9999'
     else:
@@ -75,8 +75,8 @@ def lemmatization(text: str = None) -> str:
     tokens = text.split(' ')
 
     words_lem = [morph.parse(token)[0].normal_form for token in tokens if token not in stopwords]
-    
+
     if len(words_lem) < 3:
         return '9999'
     else:
-         return ' '.join(words_lem)
+        return ' '.join(words_lem)

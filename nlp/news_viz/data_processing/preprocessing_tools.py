@@ -5,18 +5,15 @@ import pymorphy2  # pip install pymorphy2
 
 morph = pymorphy2.MorphAnalyzer()
 
-import os
-import sys
-
-PATH = os.path.join(os.getenv('HOME'), 'proj_news_radar/proj_news_viz/nlp')
-sys.path.append(PATH)
-
 # read stopwords for RU
 try:
-    with open(f'{PATH}/data/another/stopwords.txt', "r") as file:
+    with open('../../data/features/stopwords_ru.txt', "r") as file:
         stopwords = file.read().splitlines()
 except FileNotFoundError:
     stopwords = []
+
+# create cache
+cache = {}
 
 
 def clean_text(text: str = None) -> str:
@@ -45,14 +42,14 @@ def clean_text(text: str = None) -> str:
     text = re.sub(r'\s+', ' ', text).strip()  # remove the long blanks
 
     if len(text) < 3:
-        return '9999'
+        return 9999
     else:
         return text
 
 
-def lemmatization(text: str = None) -> str:
+def lemmatize(text: str = None) -> str:
     '''
-    lemmatization text 
+    lemmatization text with cache
     
     Parameters
     ----------
@@ -72,11 +69,20 @@ def lemmatization(text: str = None) -> str:
 
     # get tokens from input text
     # in this case it's normal approach because we hard cleaned text
-    tokens = text.split(' ')
+    list_tokens = text.split(' ')
 
-    words_lem = [morph.parse(token)[0].normal_form for token in tokens if token not in stopwords]
+    words_lem = []
+    for token in list_tokens:
+        if token not in stopwords:
+            if token in cache:
+                words_lem.append(cache[token])
+            else:
+                tmp_cach = cache[token] = morph.parse(token)[0].normal_form
+                words_lem.append(tmp_cach)
+        else:
+            pass
 
     if len(words_lem) < 3:
-        return '9999'
+        return 9999
     else:
         return ' '.join(words_lem)

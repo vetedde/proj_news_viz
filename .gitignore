@@ -122,7 +122,7 @@ nlp/models/
 
 nlp/notebooks/topic_models/separateTopics/lenta/data/batches/*
 nlp/notebooks/topic_models/separateTopics/lenta/data/dicts/*
-nlp/notebooks/topic_models/sseparateTopics/lenta/data/vwpath/*
+nlp/notebooks/topic_models/separateTopics/lenta/data/vwpath/*
 
 nlp/notebooks/topic_models/separateTopics/interfax/data/batches/*
 nlp/notebooks/topic_models/separateTopics/interfax/data/dicts/*

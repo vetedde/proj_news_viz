@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import html
 import re
 
@@ -47,6 +49,7 @@ def clean_text(text: str = None) -> str:
         return text
 
 
+@lru_cache()
 def lemmatize(text: str = None) -> str:
     '''
     lemmatization text with cache
@@ -71,16 +74,7 @@ def lemmatize(text: str = None) -> str:
     # in this case it's normal approach because we hard cleaned text
     list_tokens = text.split(' ')
 
-    words_lem = []
-    for token in list_tokens:
-        if token not in stopwords:
-            if token in cache:
-                words_lem.append(cache[token])
-            else:
-                tmp_cach = cache[token] = morph.parse(token)[0].normal_form
-                words_lem.append(tmp_cach)
-        else:
-            pass
+    words_lem = [morph.parse(token)[0].normal_form for token in list_tokens if token not in stopwords]
 
     if len(words_lem) < 3:
         return 9999

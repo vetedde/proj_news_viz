@@ -4,14 +4,20 @@
 source code for use in this project
 
 ```
-├── news_viz                    <- Source code for use in this project.
-│   ├── __init__.py             <- Makes src a Python module
+├── news_viz                        <- source code for use in this project
+│   ├── __init__.py                 <- makes src a Python module
 │   │
-│   ├── ner                     <- Scripts to NER
+│   ├── data_processing             <- scripts to process data
+│   │   └── preprocessing_tools.py
+│   │
+│   ├── models                      <- scripts to our models
+│   │   └── preprocessing_tools.py
+│   │
+│   ├── ner                         <- scripts to NER
 │   │   └── cleanedNames.py 
 │   │
-│   ├── data_processing         <- Scripts to process data
-│   │   └── preprocessing_tools.py
+│   ├── evaluation                  <- scripts to any evaluation (custom metrics, visualization & etc.)
+│   │   └── visualization.py
 │   │
 │   ├── 
 ```

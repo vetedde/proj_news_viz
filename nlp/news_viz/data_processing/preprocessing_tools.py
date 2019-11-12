@@ -25,7 +25,7 @@ def clean_text(text: str = None) -> str:
     Parameters
     ----------
     text : string, default None
-        input text 
+        input text
         
     Returns
     -------

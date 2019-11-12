@@ -12,28 +12,20 @@ def plot_metrics(
 ) -> None:
     """
     plot any metrics
-    
     Parameters
     ----------
-    
     range_topics: list
         list range topics, like `[20, 25, 30, 35, 40]`
-    
     metric : list
         value metric in the list
-        
     title : string
         plot title. at default title start from 'метрика: [here your words]'
-    
     fig_size: tuple (default = (10,5))
         figsize figure
-        
     color: string (default = 'k')
         color line
-    
     line_width : int (default = 3)
         line width
-    
     marker : string (default = 'x')
         line marker
     """

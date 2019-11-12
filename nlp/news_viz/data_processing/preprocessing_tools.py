@@ -21,12 +21,10 @@ cache = {}
 def clean_text(text: str = None) -> str:
     '''
     clean text, leaving only tokens for clustering
-    
     Parameters
     ----------
     text : string, default None
         input text
-        
     Returns
     -------
     text : string
@@ -53,12 +51,10 @@ def clean_text(text: str = None) -> str:
 def lemmatize(text: str = None) -> str:
     '''
     lemmatization text with cache
-    
     Parameters
     ----------
     input_text : string, default None
         cleaned text
-        
     Returns
     -------
     words_lem : string

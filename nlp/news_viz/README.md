@@ -1,4 +1,4 @@
-[news_viz] or src
+news_viz
 --------
 
 source code for use in this project

@@ -22,19 +22,6 @@ source code for use in this project
 │   ├── 
 ```
 
-
-__________________
-how add PATH to jupyter:
-
-        import os
-        import sys
-        
-        home_path = os.getenv('HOME') # create home directory
-        dir_project = 'proj_news_viz/nlp/structure' # write your main proj directory 
-
-        PATH = os.path.join(home_path, dir_project)
-        sys.path.append(PATH)
-
 __________________
 examples structure:
 ```

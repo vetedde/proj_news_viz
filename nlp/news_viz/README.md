@@ -11,13 +11,13 @@ source code for use in this project
 │   │   └── preprocessing_tools.py
 │   │
 │   ├── models                      <- scripts to our models
-│   │   └── preprocessing_tools.py
+│   │   └── topic_modeling.py
 │   │
 │   ├── ner                         <- scripts to NER
 │   │   └── cleanedNames.py 
 │   │
-│   ├── evaluation                  <- scripts to any evaluation (custom metrics, visualization & etc.)
-│   │   └── visualization.py
+│   ├── visualization               <- scripts to any evaluation (custom metrics, visualization & etc.)
+│   │   └── visualize.py
 │   │
 │   ├── 
 ```

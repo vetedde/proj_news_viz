@@ -11,7 +11,8 @@ def plot_metrics(
     marker: str = 'x',
 ) -> None:
     """
-    plot any metrics
+    plot any metricspip install 
+
     Parameters
     ----------
     range_topics: list

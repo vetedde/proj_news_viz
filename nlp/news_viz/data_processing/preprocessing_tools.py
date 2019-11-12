@@ -21,10 +21,12 @@ cache = {}
 def clean_text(text: str = None) -> str:
     '''
     clean text, leaving only tokens for clustering
+
     Parameters
     ----------
     text : string, default None
         input text
+        
     Returns
     -------
     text : string

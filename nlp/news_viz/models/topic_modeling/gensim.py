@@ -57,6 +57,7 @@ def fit_tm_gensim(
         perplexity_value = model_gensim.log_perplexity(corpus)
         print(f'\tperplexity score: {perplexity_value}')
 
+        # time
         time_end = datetime.now() - time_start
         print(f'\n\ttime: {time_end}')
 

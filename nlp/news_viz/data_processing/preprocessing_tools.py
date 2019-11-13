@@ -51,9 +51,9 @@ def clean_text(text: str = None) -> str:
 
 @lru_cache()
 def lemmatize(text: str = None) -> str:
-    '''
+    """
     lemmatization text with cache
-    
+
     Parameters
     ----------
     input_text : string, default None
@@ -62,7 +62,7 @@ def lemmatize(text: str = None) -> str:
     -------
     words_lem : string
         lemmatized text
-    '''
+    """
 
     # get tokens from input text
     # in this case it's normal approach because we hard cleaned text

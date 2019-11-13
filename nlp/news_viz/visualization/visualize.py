@@ -11,7 +11,7 @@ def plot_metrics(
     marker: str = 'x',
 ) -> None:
     """
-    plot any metricspip install 
+    plot any metricspip install
 
     Parameters
     ----------

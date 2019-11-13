@@ -26,7 +26,7 @@ def clean_text(text: str = None) -> str:
     ----------
     text : string, default None
         input text
-        
+
     Returns
     -------
     text : string
@@ -53,6 +53,7 @@ def clean_text(text: str = None) -> str:
 def lemmatize(text: str = None) -> str:
     '''
     lemmatization text with cache
+    
     Parameters
     ----------
     input_text : string, default None

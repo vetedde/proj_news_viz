@@ -12,7 +12,7 @@ source code for use in this project
 │   │
 │   ├── models                      <- scripts to our models
 │   │   ├── topic_modeling
-│   │   │   ├── 
+│   │   │   ├── gensim.py
 │   │
 │   ├── ner                         <- scripts to NER
 │   │   └── cleanedNames.py 

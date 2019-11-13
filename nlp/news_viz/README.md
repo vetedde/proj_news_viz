@@ -11,7 +11,8 @@ source code for use in this project
 │   │   └── preprocessing_tools.py
 │   │
 │   ├── models                      <- scripts to our models
-│   │   └── topic_modeling.py
+│   │   ├── topic_modeling
+│   │   │   ├── 
 │   │
 │   ├── ner                         <- scripts to NER
 │   │   └── cleanedNames.py 
@@ -34,8 +35,7 @@ examples structure:
 │   ├── features             <- Scripts to turn raw data into features for modeling
 │   │   └── build_features.py
 │   │
-│   ├── models               <- Scripts to train models and then use trained models to make
-│   │   │                       predictions
+│   ├── models               <- Scripts to train models and then use trained models to make predictions
 │   │   ├── predict_model.py
 │   │   └── train_model.py
 │   │

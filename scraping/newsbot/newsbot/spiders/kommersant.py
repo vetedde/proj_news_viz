@@ -21,12 +21,15 @@ class KommersantSpider(NewsSpider):
     }
 
     config = NewsSpiderConfig(
-        title_path='(.//*[@class="article_name"])[1]//text()',
+        title_path='//h2[contains(@class, "article_name")]//text()',
+        subtitle_path= '//h1[contains(@class, "article_subhead")]//text()',
         date_path='//meta[contains(@property, "published_time")]/@content',
         date_format='%Y-%m-%dT%H:%M:%S%z',  # 2019-03-09T12:03:10+03:00
         text_path='//p[@class="b-article__text"]//text()',
         topics_path='//meta[contains(@name, "category")]/@content',
+        subtopics_path='_',
         authors_path='//p[contains(@class, "document_authors")]//text()',
+        tags_path = '//meta[contains(@name, "keywords")]/@content',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -35,7 +38,7 @@ class KommersantSpider(NewsSpider):
         reposts_tg_path='_',
         likes_path='_',
         views_path='_',
-        comm_count_path='//span[contains(@class, "comments-number hide1 hide2")]/text()'
+        comm_count_path='_'
     )
     news_le = LinkExtractor(restrict_xpaths='//div[@class="archive_result__item_text"]')
 
@@ -53,7 +56,7 @@ class KommersantSpider(NewsSpider):
 
         # Requesting the next page if we need to
         self.page_dt -= timedelta(days=1)
-        if self.page_dt.date() >= self.until_date:
+        if self.start_date >= self.page_dt.date() >= self.until_date:
             link_url = self.link_tmpl.format(self.page_dt.strftime('%Y-%m-%d'))
 
             yield scrapy.Request(url=link_url,
@@ -82,6 +85,20 @@ class KommersantSpider(NewsSpider):
             # If it's a gallery (no text) or special project then don't return anything (have another html layout)
             if 'text' not in res or 'title' not in res:
                 break
+            res['tags'] = [tags.strip(',').replace(',', ', ') for tags in res['tags']]
+
+
+            if 'Ъ-FM' in res['topics'][0]:
+                l = res['topics'][0].split(',')
+                if len(l) > 1:
+                    print(res['topics'][0])
+                    res['topics'][0] = ', '.join(l[1:])
+                else:
+                    res['topics'][0] = ''
+            else:
+                res['topics'][0] = res['topics'][0].replace(',', ', ')
+                res['topics'][0] = res['topics'][0].replace('.', ', ')
+
 
             # Remove ":" in timezone
             pub_dt = res['date'][0]

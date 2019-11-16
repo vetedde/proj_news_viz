@@ -13,11 +13,14 @@ class VedomostiSpider(NewsSpider):
     start_urls = ['https://www.vedomosti.ru/newsline']
     config = NewsSpiderConfig(
         title_path='(.//div[contains(@class, "b-news-item__title")]//h1)[1]/text()',
+        subtitle_path= '_',
         date_path='//time[@class="b-newsline-item__time"]/@pubdate',
         date_format='%Y-%m-%d %H:%M:%S %z',  # 2019-03-02 20:08:47 +0300
         text_path='(.//div[contains(@class, "b-news-item__text")])[1]/p//text()',
         topics_path='(.//div[contains(@class, "io-category")])[1]/text()',
+        subtopics_path='_',
         authors_path='_',
+        tags_path = '_',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -76,12 +79,9 @@ class VedomostiSpider(NewsSpider):
         for res in super().parse_document(response):
             res['date'] = [response.meta.get('date').strftime(self.config.date_format)]
 
-            all_text = [text.strip() for text in res['text']]
-            all_title = [text.strip() for text in res['title']]
-            all_topic = [text.strip() for text in res['topics']]
+            res['text'] = [text.strip() for text in res['text']]
+            res['title'] = [text.strip() for text in res['title']]
+            res['topics'] = [text.strip() for text in res['topics']]
 
-            res['topics'] = [' '.join(all_topic)]
-            res['title'] = [' '.join(all_title)]
-            res['text'] = [' '.join(all_text)]
 
             yield res

@@ -18,15 +18,17 @@ class MeduzaSpider(NewsSpider):
     fields = ['title', 'topics', 'authors', 'edition', 'url', 'text', 'date', ]
 
     config = NewsSpiderConfig(
-        title_path='//h1[@class="RichTitle-root" or @class="SimpleTitle-root" or ' +
-                   '@class="RichTitle-root RichTitle-slide"]//text()',
-        date_path='//time[@class="Timestamp-root"]/text()',
+        title_path='//h1[contains(@class,"RichTitle-root") or contains(@class,"SimpleTitle-root") or contains(@class,"RichTitle-root RichTitle-slide")]//text()',
+        subtitle_path= '//h3[contains(@class, "CardTitle-title") or contains(@class, "SimpleBlock-h3")]//text()',
+        date_path='//time[contains(@class,"Timestamp-root")]/text()',
         date_format='%H:%M, %d %m %Y',
-        text_path='//div[@class="GeneralMaterial-article" or @class="SlidesMaterial-layout" ' +
-                  'or @class="MediaCaption-caption"]//p//text() | //div[@class="MediaCaption-caption"]//text() | ' +
-                  '//p[@class="SimpleBlock-p" or @class="SimpleBlock-lead"]//text()',
+        text_path='//div[contains(@class,"GeneralMaterial-article") or contains(@class, "SlidesMaterial-layout") ' +
+                  'or contains(@class,"MediaCaption-caption")]//p//text() | //div[contains(@class, "MediaCaption-caption")]//text() | ' +
+                  '//p[contains(@class,"SimpleBlock-p") or contains(@class,"SimpleBlock-lead")]//text()',
         topics_path='_',
-        authors_path='_',
+        subtopics_path='_',
+        authors_path='//p[contains(@class, "MaterialNote-note_caption")]/strong/text()',
+        tags_path = '_',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -52,7 +54,7 @@ class MeduzaSpider(NewsSpider):
         filtered_articles = []
         for content in articles:
             pub_date = datetime.strptime(content['pub_date'], '%Y-%m-%d').date()
-            if pub_date >= self.until_date:
+            if self.start_date >= pub_date >= self.until_date:
                 filtered_articles.append(content)
             else:
                 last_page = True
@@ -77,6 +79,7 @@ class MeduzaSpider(NewsSpider):
 
     def parse_document(self, response):
         for res in super().parse_document(response):
+
             for field in self.fields:
                 if field not in res:
                     res[field] = ['']

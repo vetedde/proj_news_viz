@@ -8,12 +8,15 @@ import scrapy
 
 class Document(scrapy.Item):
     title = scrapy.Field()
+    subtitle = scrapy.Field()
     text = scrapy.Field()
     date = scrapy.Field()
     url = scrapy.Field()
     edition = scrapy.Field()
     topics = scrapy.Field()
+    subtopics = scrapy.Field()
     authors = scrapy.Field()
+    tags = scrapy.Field()
     reposts_fb = scrapy.Field()
     reposts_vk = scrapy.Field()
     reposts_ok = scrapy.Field()

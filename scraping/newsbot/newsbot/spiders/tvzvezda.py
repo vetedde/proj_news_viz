@@ -7,11 +7,14 @@ class TvZvezdaSpider(NewsSpider):
     start_urls = ["https://tvzvezda.ru/news"]
     config = NewsSpiderConfig(
         title_path='//h1/text()',
+        subtitle_path= '//div[@class="anons"]//text()',
         date_path='//div[contains(@class, "date_news")]//text()',
         date_format="%H:%M %d.%m.%Y",
         text_path='//div[contains(@class, "glav_text")]//text()',
         topics_path='//meta[contains(@property, "article:section")]/@content',
+        subtopics_path='_',
         authors_path='//div[contains(@class, "autor_news")]/a/text()',
+        tags_path = '//div[@class="tags"]//a//text()',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -28,7 +31,7 @@ class TvZvezdaSpider(NewsSpider):
     visited_urls = []
 
     def parse(self, response):
-        
+
         if response.url not in self.visited_urls:
             for link in self.news_le.extract_links(response):
               yield scrapy.Request(url=link.url, callback=self.parse_document)

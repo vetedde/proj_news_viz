@@ -11,13 +11,17 @@ class GazetaSpider(NewsSpider):
 
     config = NewsSpiderConfig(
         title_path='//div[contains(@itemprop, "alternativeHeadline")]//text() | '
-                   '//h1/text()',
-        date_path='//time[contains(@itemprop, "datePublished")]/@datetime',
+                   '//h1[contains(@class, "h_1") or contains(@itemprop, "headline")]//text()',
+        subtitle_path= '//h1[contains(@class, "sub_header")]//text()',
+        date_path='//time[contains(@itemprop, "datePublished") or contains(@class, "date_time")]/@datetime',
         date_format='%Y-%m-%dT%H:%M:%S%z',
         text_path='//div[contains(@itemprop, "articleBody")]//p//text() | '
-                  '//span[contains(@itemprop, "description")]//text()',
-        topics_path='//div[contains(@class, "active")]/a/span/text()',
+                  '//span[contains(@itemprop, "description")]//text() | '
+                  '//main//h2/text()',
+        topics_path='//div[contains(@class, "navbar-main")]//div[contains(@class, "active")]/a/span/text()',
+        subtopics_path = '//div[contains(@class, "navbar-secondary")]//div[contains(@class, "active")]/a/span/text()',
         authors_path='//span[contains(@itemprop, "author")]//text()',
+        tags_path = '_',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -39,7 +43,7 @@ class GazetaSpider(NewsSpider):
             # Convert last_modif_dt to datetime
             last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
 
-            if last_modif_dt.date() >= self.until_date:
+            if last_modif_dt.date() >= self.until_date and last_modif_dt.date() <= self.start_date:
                 yield Request(url=link, callback=self.parse_sub_sitemap)
 
     def parse_sub_sitemap(self, response):
@@ -52,7 +56,7 @@ class GazetaSpider(NewsSpider):
             # Convert last_modif_dt to datetime
             last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
 
-            if last_modif_dt.date() >= self.until_date:
+            if last_modif_dt.date() >= self.until_date and last_modif_dt.date() <= self.start_date:
                 yield Request(url=link, callback=self.parse_articles_sitemap)
 
     def parse_articles_sitemap(self, response):
@@ -65,7 +69,7 @@ class GazetaSpider(NewsSpider):
             # Convert last_modif_dt to datetime
             last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
 
-            if last_modif_dt.date() >= self.until_date:
+            if last_modif_dt.date() >= self.until_date and last_modif_dt.date() <= self.start_date:
                 if link.endswith('.shtml') and not link.endswith('index.shtml'):
                     yield Request(url=link, callback=self.parse_document)
 

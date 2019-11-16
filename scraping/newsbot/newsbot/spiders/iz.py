@@ -11,12 +11,15 @@ class IzSpider(NewsSpider):
     start_urls = ["https://iz.ru/sitemap.xml"]
     config = NewsSpiderConfig(
         title_path='//h1[contains(@itemprop, "headline")]/span/text()',
+        subtitle_path= '_',
         date_path='//meta[contains(@property, "published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S%z",
         text_path='//article//p//text()',
         topics_path='//div[contains(@itemprop, "genre")]//'
                     'a[contains(@href, "rubric") or contains(@href, "press-release")]//text()',
+        subtopics_path='_',
         authors_path='//div[contains(@itemprop, "author")]//a[contains(@href, "author")]//text()',
+        tags_path = '//div[contains(@class, "hash_tags")]//a//text()',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -73,7 +76,7 @@ class IzSpider(NewsSpider):
             # Convert last_modif_dt to datetime
             last_modif_dt = datetime.strptime(last_modif_dt, '%Y-%m-%d')
 
-            if last_modif_dt.date() >= self.until_date:
+            if self.start_date >= last_modif_dt.date() >= self.until_date:
                 yield Request(url=link, callback=self.parse_document)
 
     def parse_document(self, response):

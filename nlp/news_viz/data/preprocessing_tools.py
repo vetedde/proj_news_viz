@@ -24,7 +24,7 @@ def clean_text(text: str = None) -> str:
 
     Parameters
     ----------
-    text : string, default None
+    text : string
         input text
 
     Returns
@@ -50,13 +50,30 @@ def clean_text(text: str = None) -> str:
 
 
 @lru_cache()
+def get_morph4token(token: str = None) -> str:
+    """
+    get lemma for one tokens with lru_cache
+
+    Parameters
+    ----------
+    token : string
+        input word (e.x. from list tokens)
+    Returns
+    -------
+    word_lem : string
+        lemmatized text
+    """
+
+    return morph.parse(token)[0].normal_form
+
+
 def lemmatize(text: str = None) -> str:
     """
     lemmatization text with cache
 
     Parameters
     ----------
-    input_text : string, default None
+    input_text : string
         cleaned text
     Returns
     -------
@@ -73,7 +90,7 @@ def lemmatize(text: str = None) -> str:
     # in this case it's normal approach because we hard cleaned text
     list_tokens = text.split(' ')
 
-    words_lem = [morph.parse(token)[0].normal_form for token in list_tokens if token not in stopwords]
+    words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
 
     if len(words_lem) < 3:
         return 9999

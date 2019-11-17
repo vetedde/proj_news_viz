@@ -7,7 +7,7 @@ source code for use in this project
 ├── news_viz                        <- source code for use in this project
 │   ├── __init__.py                 <- makes src a Python module
 │   │
-│   ├── data_processing             <- scripts to process data
+│   ├── data                        <- scripts to process data
 │   │   └── preprocessing_tools.py
 │   │
 │   ├── models                      <- scripts to our models

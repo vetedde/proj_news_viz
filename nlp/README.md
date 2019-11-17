@@ -26,7 +26,7 @@ news_viz
 │
 ├── news_viz                        <- Source code for use in this project         
 │   ├── __init__.py                 <- makes src a Python module
-│   ├── data_processing             <- scripts to process data
+│   ├── data                        <- scripts to process data
 │   │   └── ...
 │   ├── models                      <- scripts to our models
 │   │   └── ...

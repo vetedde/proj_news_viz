@@ -3,7 +3,7 @@ from gensim.models import CoherenceModel, LdaMulticore
 
 
 def fit_tm_gensim(
-    corpus: list = None,
+    corpus: 'gensim.corpus' = None,
     dictionary: 'Dictionary' = None,
     text: list = None,
     range_topics: list = None,
@@ -15,9 +15,9 @@ def fit_tm_gensim(
     
     Parameters
     ----------
-    corpus : {iterable of list of (int, float), scipy.sparse.csc}
+    corpus : 'gensim.corpus' aka {iterable of list of (int, float), scipy.sparse.csc}
         Stream of document vectors or sparse matrix of shape (`num_terms`, `num_documents`)
-    dictionary: {dict of (int, str),  :class:`gensim.corpora.dictionary.Dictionary`}
+    dictionary: 'Dictionary' aka {dict of (int, str),  :class:`gensim.corpora.dictionary.Dictionary`}
         Mapping from word IDs to words. It is used to determine the vocabulary size,
         as well as for debugging and topic printing.
     text : list

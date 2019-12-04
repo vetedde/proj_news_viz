@@ -38,3 +38,6 @@ nlp/topic_models/separateTopics/compare/data/lenta/batches/*
 nlp/topic_models/separateTopics/compare/data/interfax/vwpath/*
 nlp/topic_models/separateTopics/compare/data/interfax/batches/*
 !nlp/topic_models/separateTopics/lenta/data/topicsProbability/*
+
+# database connect
+/nlp/experiments/exp-002_preprocessing_luigi_transfer_to_db/scripts/db.ini

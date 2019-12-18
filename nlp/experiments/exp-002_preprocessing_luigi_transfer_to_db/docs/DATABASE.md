@@ -35,16 +35,16 @@
 ### Логическая схема <a name="raw_data_logic"></a>
 ![Схема процесса](./img/01_er_logic_raw_data.JPG)
 ### Физическая схема <a name="raw_data_physical"></a>
-![Схема процесса](./img/02_er_physical_raw_data.jpg)
+![Схема процесса](./img/02_er_physical_raw_data.JPG)
 
 ## Схема базы данных для обработанных данных <a name="prepared_data"></a>
 ### Логическая схема <a name="prepared_data_logic"></a>
-![Схема процесса](./img/03_er_logic_prepared_data.jpg)
+![Схема процесса](./img/03_er_logic_prepared_data.JPG)
 ### Физическая схема <a name="prepared_data_physical"></a>
-![Схема процесса](./img/04_er_physical_prepared_data.jpg)
+![Схема процесса](./img/04_er_physical_prepared_data.JPG)
 
 # Схема pipeline<a name="process"></a>
-![Схема пайплайна](./img/pipeline.jpg)
+![Схема пайплайна](./img/pipeline.JPG)
 
 ## Описание <a name="steps"></a>
 Процесс работает с имеющимися данными и загружает их в базу. Когда будет доработан скрапинг и новые данные по новостям польются в базу напрямую, старые данные останутся.

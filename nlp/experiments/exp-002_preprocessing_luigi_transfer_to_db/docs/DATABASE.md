@@ -33,7 +33,7 @@
 # Структура хранилища данных <a name="warehouse"></a>
 ## Схема базы данных для сырых данных <a name="raw_data"></a>
 ### Логическая схема <a name="raw_data_logic"></a>
-![Схема процесса](./img/01_er_logic_raw_data.jpg)
+![Схема процесса](./img/01_er_logic_raw_data.JPG)
 ### Физическая схема <a name="raw_data_physical"></a>
 ![Схема процесса](./img/02_er_physical_raw_data.jpg)
 

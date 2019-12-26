@@ -38,38 +38,36 @@ class WriteDataToDatabase(luigi.Task):
                     _.text for _ in list(tokenize(news))
                 ]
 
+    def iter_row(self, cursor, dt_now, size=5):
+        while True:
+            rows = cursor.fetchmany(size)
+            if not rows:
+                break
+            for row in rows:
+                sents = list(sentenize(row[5]))
+                sentence = [_.text for _ in sents]
+                yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(list(self.get_tokens(sentence))), dt_now, dt_now, '1900-01-01 00:00:00' )
+
     def run(self):
+        started = time.time()
+        dt_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         with UseDatabase(self.dbconfig) as cursor:
-            sql = "SELECT id_raw_data, id_news_source, date, url, title, text FROM raw_data.raw_data where batch_date = '1900-01-01 00:00:00' "
+            sql = """SELECT id_raw_data, id_news_source, date, url, title, text 
+                    FROM raw_data.raw_data 
+                    where batch_date = '1900-01-01 00:00:00' 
+                    order by id_raw_data """
 
             cursor.execute(sql)
-            query_results = cursor.fetchall()
+            cursor.executemany("""
+                        INSERT INTO prepared_data.news
+                        (id_news, id_topic, id_news_source, id_author, date_news, link_news, title, text_news, created_date, modified_date, batch_date)
+                        VALUES
+                        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, list(self.iter_row(cursor, dt_now, 5)))
 
-            sql = """INSERT INTO prepared_data.news
-                     (id_news, id_topic, id_news_source, id_author, date_news, link_news, title, text_news, created_date, modified_date, batch_date)
-                     VALUES 
-                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-
-            dt_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            for line in query_results:
-
-                sents = list(sentenize(line[5]))
-                sentence = [_.text for _ in sents]
-
-                cursor.execute(sql, (
-                    line[0],
-                    line[1],
-                    '4847c8c7-a14f-4d59-8f62-a1c622db4aab',
-                    '4847c8c7-a14f-4d59-8f62-a1c622db4aab',
-                    line[2],
-                    line[3],
-                    line[4],
-                    str(list(self.get_tokens(sentence))),
-                    dt_now,
-                    dt_now,
-                    '1900-01-01 00:00:00'))
             self.get_target().touch()
+        print('Время обработки в секундах: ' + str(time.time() - started))
 
     def get_target(self):
         return PostgresTarget(host=self.config['dev']['host'],
@@ -102,17 +100,27 @@ class UpdateBatchDate(luigi.Task):
         return WriteDataToDatabase()
 
     def run(self):
+        started = time.time()
+
         with UseDatabase(self.dbconfig) as cursor:
             batch_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             sql = """UPDATE raw_data.raw_data
                      SET batch_date= %s
                      WHERE raw_data.raw_data.id_raw_data in (
-                     select prepared_data.news.id_news
-                     from prepared_data.news
-                     where prepared_data.news.batch_date = '1900-01-01 00:00:00');"""
+                        select prepared_data.news.id_news
+                        from prepared_data.news
+                        where prepared_data.news.batch_date = '1900-01-01 00:00:00');"""
 
             cursor.execute(sql, (batch_date,))
+
+            sql = """UPDATE prepared_data.news
+                     SET batch_date= %s
+                     WHERE prepared_data.news.batch_date = '1900-01-01 00:00:00';"""
+
+            cursor.execute(sql, (batch_date,))
+
+        print('Время обработки в секундах: ' + str(time.time() - started))
 
 
 class Dbwriter(object):

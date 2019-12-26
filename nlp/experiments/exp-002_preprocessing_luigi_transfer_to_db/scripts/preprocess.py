@@ -15,6 +15,7 @@ import configparser
 # Коннектор к базе данных
 from dbconnector import UseDatabase
 
+import re
 
 class WriteDataToDatabase(luigi.Task):
     """
@@ -31,40 +32,44 @@ class WriteDataToDatabase(luigi.Task):
                 'user': config['dev']['user'],
                 'password': config['dev']['password']}
 
-    def get_tokens(self, sentence):
+    def __get_tokens(self, sentence):
         for news in sentence:
             if len(news) > 0:
                 yield [
                     _.text for _ in list(tokenize(news))
                 ]
 
-    def iter_row(self, cursor, dt_now, size=5):
-        while True:
-            rows = cursor.fetchmany(size)
-            if not rows:
-                break
-            for row in rows:
-                sents = list(sentenize(row[5]))
-                sentence = [_.text for _ in sents]
-                yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(list(self.get_tokens(sentence))), dt_now, dt_now, '1900-01-01 00:00:00' )
+    def __iter_row(self, from_cursor, dt_now, size):
+        rows = from_cursor.fetchmany(size)
+        for row in rows:
+            sents = list(sentenize(str(row[5]).lower()))
+            sentence = [_.text for _ in sents]
+            yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(list(self.__get_tokens(sentence))), dt_now, dt_now, '1900-01-01 00:00:00' )
 
     def run(self):
         started = time.time()
         dt_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print('Время начала обработки: ' + str(time.asctime()))
 
-        with UseDatabase(self.dbconfig) as cursor:
+        with UseDatabase(self.dbconfig) as from_cursor:
             sql = """SELECT id_raw_data, id_news_source, date, url, title, text 
                     FROM raw_data.raw_data 
                     where batch_date = '1900-01-01 00:00:00' 
                     order by id_raw_data """
 
-            cursor.execute(sql)
-            cursor.executemany("""
-                        INSERT INTO prepared_data.news
-                        (id_news, id_topic, id_news_source, id_author, date_news, link_news, title, text_news, created_date, modified_date, batch_date)
-                        VALUES
-                        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        """, list(self.iter_row(cursor, dt_now, 5)))
+            from_cursor.execute(sql)
+
+            with UseDatabase(self.dbconfig) as to_cursor:
+                while True:
+                    records = list(self.__iter_row(from_cursor, dt_now, 10))
+                    if not records:
+                        break
+                    to_cursor.executemany("""
+                                INSERT INTO prepared_data.news
+                                (id_news, id_topic, id_news_source, id_author, date_news, link_news, title, text_news, created_date, modified_date, batch_date)
+                                VALUES
+                                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                """, records)
 
             self.get_target().touch()
         print('Время обработки в секундах: ' + str(time.time() - started))
@@ -101,6 +106,7 @@ class UpdateBatchDate(luigi.Task):
 
     def run(self):
         started = time.time()
+        print('Время начала обработки: ' + str(time.asctime()))
 
         with UseDatabase(self.dbconfig) as cursor:
             batch_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -14,6 +14,7 @@ import configparser
 
 # Коннектор к базе данных
 from dbconnector import UseDatabase
+from dbconnector import UseDatabaseCusror
 
 import re
 
@@ -51,13 +52,14 @@ class WriteDataToDatabase(luigi.Task):
         dt_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print('Время начала обработки: ' + str(time.asctime()))
 
-        with UseDatabase(self.dbconfig) as from_cursor:
+        with UseDatabaseCusror(self.dbconfig) as from_cursor:
             sql = """SELECT id_raw_data, id_news_source, date, url, title, text 
                     FROM raw_data.raw_data 
                     where batch_date = '1900-01-01 00:00:00' 
                     order by id_raw_data """
-
+            t = time.time()
             from_cursor.execute(sql)
+            print('Exec SQL is - ', str(time.time() - t))
 
             with UseDatabase(self.dbconfig) as to_cursor:
                 while True:

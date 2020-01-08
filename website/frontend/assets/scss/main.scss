@@ -1,0 +1,42 @@
+
+// TODO: custom theme
+
+@import '~bootstrap/scss/bootstrap.scss';
+@import '~bootstrap-vue/src/index.scss';
+
+
+// Multiselect style overrides
+
+.multiselect__tag,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after {
+  background: theme-color('primary');
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight::after {
+  background: theme-color('danger');
+}
+
+.multiselect__tag-icon:hover {
+  background: darken($color: theme-color('primary'), $amount: 10);
+}
+
+.multiselect__tags {
+  border-width: $input-border-width;
+  border-color: $input-border-color;
+  border-radius: $input-border-radius;
+  border-style: solid;
+}
+
+.multiselect__tag-icon:after {
+  color: white;
+}
+
+.multiselect__placeholder {
+  color: $input-placeholder-color;
+}
+
+.multiselect__select::before {
+  border-top-color: rgb(0, 0, 0);
+}

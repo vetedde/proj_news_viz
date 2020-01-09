@@ -71,3 +71,8 @@ class Dbwriter(object):
         return [
             self.__process(fileid) for fileid in self.__get_fileids(fileids, categories)
         ]
+
+
+class Dbreader():
+    """Читает данные из базы"""
+    #todo

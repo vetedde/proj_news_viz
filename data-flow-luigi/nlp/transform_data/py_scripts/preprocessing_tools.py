@@ -9,7 +9,7 @@ morph = pymorphy2.MorphAnalyzer()
 
 # read stopwords for RU
 try:
-    with open('../../data/features/stopwords_ru.txt', "r") as file:
+    with open('../../../nlp/data/features/stopwords_ru.txt', "r") as file:
         stopwords = file.read().splitlines()
 except FileNotFoundError:
     stopwords = []
@@ -87,7 +87,4 @@ def lemmatize(text: str = None) -> str:
 
     words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
 
-    if len(words_lem) < 3:
-        return 9999
-    else:
-        return ' '.join(words_lem)
+    return words_lem

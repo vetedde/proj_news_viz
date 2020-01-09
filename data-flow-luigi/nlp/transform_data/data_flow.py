@@ -6,7 +6,6 @@ import luigi
 from luigi.contrib.postgres import PostgresTarget
 from luigi.format import UTF8
 
-from razdel import tokenize
 from razdel import sentenize
 
 from uuid import uuid4
@@ -35,19 +34,13 @@ class WriteDataToDatabase(luigi.Task):
                 'user': config['dev']['user'],
                 'password': config['dev']['password']}
 
-    def __get_tokens(self, sentence):
-        for news in sentence:
-            if len(str(news)) > 0:
-                yield [
-                    _.text for _ in list(tokenize(news))
-                ]
-
     def __iter_row(self, from_cursor, dt_now, size):
         rows = from_cursor.fetchmany(size)
         for row in rows:
             sents = list(sentenize(str(row[5]).lower()))
-            sentence = [clean_text(_.text) for _ in sents]
-            yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(list(self.__get_tokens(sentence))), dt_now, dt_now, '1900-01-01 00:00:00' )
+            clean_sentence = [clean_text(_.text) for _ in sents]
+            lemma_sentence = [lemmatize(sent) for sent in clean_sentence]
+            yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(lemma_sentence), dt_now, dt_now, '1900-01-01 00:00:00' )
 
     def run(self):
         started = time.time()
@@ -58,7 +51,7 @@ class WriteDataToDatabase(luigi.Task):
             sql = """SELECT id_raw_data, id_news_source, date, url, title, text 
                     FROM raw_data.raw_data 
                     where batch_date = '1900-01-01 00:00:00' 
-                    order by id_raw_data limit 100 """
+                    order by id_raw_data """
             t = time.time()
             from_cursor.execute(sql)
             print('Exec SQL is - ', str(time.time() - t))

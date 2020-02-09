@@ -1,15 +1,19 @@
-from functools import lru_cache
-
 import html
 import re
+import sys
+from functools import lru_cache
+from pathlib import Path
 
 import pymorphy2  # pip install pymorphy2
+
+PATH = Path('/home/vtrokhymenko/git/proj_news_viz/nlp/')
+sys.path.append(str(PATH))
 
 morph = pymorphy2.MorphAnalyzer()
 
 # read stopwords for RU
 try:
-    with open('../../data/features/stopwords_ru.txt', "r") as file:
+    with open(PATH / 'data/features/stopwords_ru.txt', "r") as file:
         stopwords = file.read().splitlines()
 except FileNotFoundError:
     stopwords = []

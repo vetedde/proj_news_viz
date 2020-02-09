@@ -4,7 +4,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
-import pymorphy2  # pip install pymorphy2
+import pymorphy2
 
 PATH = Path('/home/vtrokhymenko/git/proj_news_viz/nlp/')
 sys.path.append(str(PATH))

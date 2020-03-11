@@ -131,13 +131,13 @@ class UpdateBatchDate(luigi.Task):
                         from prepared_data.news
                         where prepared_data.news.batch_date = '1900-01-01 00:00:00');"""
 
-            cursor.execute(sql, (batch_date,))
+            cursor.execute(sql, (batch_date, ))
 
             sql = """UPDATE prepared_data.news
                      SET batch_date= %s
                      WHERE prepared_data.news.batch_date = '1900-01-01 00:00:00';"""
 
-            cursor.execute(sql, (batch_date,))
+            cursor.execute(sql, (batch_date, ))
 
         print("Время обработки в секундах: " + str(time.time() - started))
 

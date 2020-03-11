@@ -24,9 +24,11 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
     дополнительной предварительной обработки.
     """
 
-    def __init__(
-        self, root, fileids=PathPattern.doc_pattern.value, encoding="utf8", **kwargs
-    ):
+    def __init__(self,
+                 root,
+                 fileids=PathPattern.doc_pattern.value,
+                 encoding="utf8",
+                 **kwargs):
         """
         Инициализирует объект чтения промежуточного обработанных файлов
         корпуса.
@@ -56,7 +58,8 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
         которые передаются каждой внутренний функции объекта чтения корпуса.
         """
         if fileids is not None and categories is not None:
-            raise ValueError("Укажите либо файлы, либо категории, а не оба параметра")
+            raise ValueError(
+                "Укажите либо файлы, либо категории, а не оба параметра")
 
         if categories is not None:
             return self.fileids(categories)
@@ -90,8 +93,10 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
         for path, encoding in self.abspaths(fileids, include_encoding=True):
             with codecs.open(path, "r", encoding=encoding) as f:
                 reader = list(
-                    csv.DictReader(f, delimiter=",", quotechar='"', escapechar="\\")
-                )
+                    csv.DictReader(f,
+                                   delimiter=",",
+                                   quotechar='"',
+                                   escapechar="\\"))
                 # reader = list(csv.DictReader(f, delimiter=';', quotechar='"', escapechar='\\'))
                 for row in reader:
                     yield (row)
@@ -141,36 +146,41 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
                     self.__tokens[word.lower()] += 1
 
         # Определить число файлов и категорий в корпусе
-        n_fileids = len(self.check_arguments(fileids, categories) or self.fileids())
-        n_topics = len(self.categories(self.check_arguments(fileids, categories)))
+        n_fileids = len(
+            self.check_arguments(fileids, categories) or self.fileids())
+        n_topics = len(
+            self.categories(self.check_arguments(fileids, categories)))
 
         # Составить список новостей
         list_news = list(self.read_columns(fileids, categories))
         # Вернуть структуру с информацией
         return {
-            "Количество файлов": n_fileids,
-            "Количество источников новостей": n_topics,
-            "Количество обработанных новостей": counts["rows"],
-            "Количество предложений": counts["sents"],
-            "Количество слов": counts["words"],
-            "Количество токенов (словарь)": len(self.get_tokens),
-            "Коэффициент лексического разнообразия (lexical diversity)": float(
-                counts["words"]
-            )
-            / float(len(self.get_tokens)),
-            "Среднее количество новостей по отношению к файлам": float(counts["rows"])
-            / float(n_fileids),
-            "Среднее количество предложений в новостях": float(counts["sents"])
-            / float(counts["rows"]),
-            "Начальная дата в обработке": min(
-                self.read_columns(fileids, categories, "date")
-            ),
-            "Конечная дата в обработке": max(
-                self.read_columns(fileids, categories, "date")
-            ),
-            "Количество повторяющихся новостей": len(list_news) - len(set(list_news)),
-            "Количество пустых новостных элементов": len(
-                [item for item in list_news if len(item) == 0]
-            ),
-            "Время обработки в секундах": time.time() - started,
+            "Количество файлов":
+            n_fileids,
+            "Количество источников новостей":
+            n_topics,
+            "Количество обработанных новостей":
+            counts["rows"],
+            "Количество предложений":
+            counts["sents"],
+            "Количество слов":
+            counts["words"],
+            "Количество токенов (словарь)":
+            len(self.get_tokens),
+            "Коэффициент лексического разнообразия (lexical diversity)":
+            float(counts["words"]) / float(len(self.get_tokens)),
+            "Среднее количество новостей по отношению к файлам":
+            float(counts["rows"]) / float(n_fileids),
+            "Среднее количество предложений в новостях":
+            float(counts["sents"]) / float(counts["rows"]),
+            "Начальная дата в обработке":
+            min(self.read_columns(fileids, categories, "date")),
+            "Конечная дата в обработке":
+            max(self.read_columns(fileids, categories, "date")),
+            "Количество повторяющихся новостей":
+            len(list_news) - len(set(list_news)),
+            "Количество пустых новостных элементов":
+            len([item for item in list_news if len(item) == 0]),
+            "Время обработки в секундах":
+            time.time() - started,
         }

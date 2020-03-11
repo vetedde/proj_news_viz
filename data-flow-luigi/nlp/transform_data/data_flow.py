@@ -56,9 +56,9 @@ class WriteDataToDatabase(luigi.Task):
         print("Время начала обработки: " + str(time.asctime()))
 
         with UseDatabaseCusror(self.dbconfig) as from_cursor:
-            sql = """SELECT id_raw_data, id_news_source, date, url, title, text 
-                    FROM raw_data.raw_data 
-                    where batch_date = '1900-01-01 00:00:00' 
+            sql = """SELECT id_raw_data, id_news_source, date, url, title, text
+                    FROM raw_data.raw_data
+                    where batch_date = '1900-01-01 00:00:00'
                     order by id_raw_data """
             t = time.time()
             from_cursor.execute(sql)

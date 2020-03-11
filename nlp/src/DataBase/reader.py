@@ -55,7 +55,8 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
         которые передаются каждой внутренний функции объекта чтения корпуса.
         """
         if fileids is not None and categories is not None:
-            raise ValueError("Укажите либо файлы, либо категории, а не оба параметра")
+            raise ValueError(
+                "Укажите либо файлы, либо категории, а не оба параметра")
 
         if categories is not None:
             return self.fileids(categories)
@@ -83,12 +84,13 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
             try:
                 csv.field_size_limit(maxInt)
             except OverflowError:
-                maxInt = int(maxInt/10)
+                maxInt = int(maxInt / 10)
                 decrement = True
 
         for path, encoding in self.abspaths(fileids, include_encoding=True):
             with codecs.open(path, 'r', encoding=encoding) as f:
-                reader = list(csv.DictReader(f, delimiter=',', quotechar='"', escapechar='\\'))
+                reader = list(csv.DictReader(f, delimiter=',',
+                                             quotechar='"', escapechar='\\'))
                 # reader = list(csv.DictReader(f, delimiter=';', quotechar='"', escapechar='\\'))
                 for row in reader:
                     yield(row)
@@ -138,8 +140,10 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
                     self.__tokens[word.lower()] += 1
 
         # Определить число файлов и категорий в корпусе
-        n_fileids = len(self.check_arguments(fileids, categories) or self.fileids())
-        n_topics = len(self.categories(self.check_arguments(fileids, categories)))
+        n_fileids = len(self.check_arguments(
+            fileids, categories) or self.fileids())
+        n_topics = len(self.categories(
+            self.check_arguments(fileids, categories)))
 
         # Составить список новостей
         list_news = list(self.read_columns(fileids, categories))

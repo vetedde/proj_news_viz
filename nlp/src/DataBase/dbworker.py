@@ -15,6 +15,7 @@ class Dbwriter(object):
     Обертывает класс CSVCorpusReader, читает подготовленные файлы для загрузки
     и записывает данные в БД в таблицу сырых данных
     """
+
     def __init__(self, corpus):
         """
         corpus - класс CSVCorpusReader
@@ -60,7 +61,8 @@ class Dbwriter(object):
 
             for line in list(self.corpus.read_docs(fileid)):
                 n_rows = n_rows + 1
-                cursor.execute(sql, (uuid4().hex, query_results[0][0], line['date'], line['url'], line['edition'], line['topics'], line['authors'], line['title'], line['text'], line['reposts_fb'], line['reposts_vk'], line['reposts_ok'], line['reposts_twi'], line['reposts_lj'], line['reposts_tg'], line['likes'], line['views'], line['comm_count'], '2019-12-02 22:43:00', '2019-12-02 22:43:00', '1900-01-01 00:00:00'))
+                cursor.execute(sql, (uuid4().hex, query_results[0][0], line['date'], line['url'], line['edition'], line['topics'], line['authors'], line['title'], line['text'], line['reposts_fb'], line['reposts_vk'],
+                                     line['reposts_ok'], line['reposts_twi'], line['reposts_lj'], line['reposts_tg'], line['likes'], line['views'], line['comm_count'], '2019-12-02 22:43:00', '2019-12-02 22:43:00', '1900-01-01 00:00:00'))
 
         print('Количество строк в файле ' + fileid + ':', n_rows)
         print('Время обработки в секундах: ' + str(time.time() - started))
@@ -75,4 +77,4 @@ class Dbwriter(object):
 
 class Dbreader():
     """Читает данные из базы"""
-    #todo
+    # todo

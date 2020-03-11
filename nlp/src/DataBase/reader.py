@@ -1,16 +1,15 @@
 import codecs
-import os
-import time
 import csv
+import os
 import sys
-
-from enum import Enum
+import time
 from collections import Counter
-from razdel import tokenize
-from razdel import sentenize
+from enum import Enum
 
-from nltk.corpus.reader.api import CorpusReader
 from nltk.corpus.reader.api import CategorizedCorpusReader
+from nltk.corpus.reader.api import CorpusReader
+from razdel import sentenize
+from razdel import tokenize
 
 
 class PathPattern(Enum):

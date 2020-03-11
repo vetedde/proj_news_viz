@@ -1,13 +1,12 @@
+import configparser
 import os
 import time
 from datetime import datetime
-
 from uuid import uuid4
-import configparser
 
-# Коннектор к базе данных
 from dbconnector import UseDatabase
 from dbconnector import UseDatabaseCusror
+# Коннектор к базе данных
 
 
 class Dbwriter(object):

@@ -1,18 +1,15 @@
+import configparser
 import time
 from datetime import datetime
 
 import luigi
 from luigi.contrib.postgres import PostgresTarget
-
-from razdel import sentenize
-
-import configparser
-
-# Коннектор к базе данных
 from py_scripts.dbconnector import UseDatabase
 from py_scripts.dbconnector import UseDatabaseCusror
-
-from py_scripts.preprocessing_tools import clean_text, lemmatize
+from py_scripts.preprocessing_tools import clean_text
+from py_scripts.preprocessing_tools import lemmatize
+from razdel import sentenize
+# Коннектор к базе данных
 
 
 class WriteDataToDatabase(luigi.Task):

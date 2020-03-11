@@ -1,14 +1,11 @@
-import os
 import time
 from datetime import datetime
 
 import luigi
 from luigi.contrib.postgres import PostgresTarget
-from luigi.format import UTF8
 
 from razdel import sentenize
 
-from uuid import uuid4
 import configparser
 
 # Коннектор к базе данных
@@ -17,7 +14,6 @@ from py_scripts.dbconnector import UseDatabaseCusror
 
 from py_scripts.preprocessing_tools import clean_text, lemmatize
 
-import re
 
 class WriteDataToDatabase(luigi.Task):
     """
@@ -40,7 +36,7 @@ class WriteDataToDatabase(luigi.Task):
             sents = list(sentenize(str(row[5]).lower()))
             clean_sentence = [clean_text(_.text) for _ in sents]
             lemma_sentence = [lemmatize(sent) for sent in clean_sentence]
-            yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(lemma_sentence), dt_now, dt_now, '1900-01-01 00:00:00' )
+            yield (str(row[0]), str(row[1]), '4847c8c7-a14f-4d59-8f62-a1c622db4aab', '4847c8c7-a14f-4d59-8f62-a1c622db4aab', row[2], row[3], row[4], str(lemma_sentence), dt_now, dt_now, '1900-01-01 00:00:00')
 
     def run(self):
         started = time.time()
@@ -124,6 +120,7 @@ class UpdateBatchDate(luigi.Task):
             cursor.execute(sql, (batch_date,))
 
         print('Время обработки в секундах: ' + str(time.time() - started))
+
 
 if __name__ == '__main__':
     luigi.run()

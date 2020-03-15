@@ -17,12 +17,12 @@ def plot_frequency_words(vocab: list = None, top_words: int = 30, plt_background
 
     if plt_background == 'dark':
         plt.style.use('dark_background')
-    
+
     x, y = [], []
     for key, val in vocab[:top_words]:
         x.append(key)
         y.append(val)
-    
+
     plt.figure(figsize=(20, 10),)
     plt.bar(x, y)
     plt.title(f'топ-{top_words} частотных слов')

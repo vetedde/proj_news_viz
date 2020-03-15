@@ -23,19 +23,19 @@ cache = {}
 
 
 def clean_text(text: str = None) -> str:
-    '''
+    """
     clean text, leaving only tokens for clustering
 
     Parameters
     ----------
-    text : string
-        input text
+        text : string
+            input text
 
     Returns
     -------
-    text : string
-        cleaned string text
-    '''
+        text : string
+            cleaned string text
+    """
 
     if not isinstance(text, str):
         text = str(text)
@@ -48,7 +48,7 @@ def clean_text(text: str = None) -> str:
     text = re.sub(r'\s+', ' ', text).strip()  # remove the long blanks
 
     if len(text) < 3:
-        return 9999
+        return '9999'
     else:
         return text
 
@@ -97,6 +97,6 @@ def lemmatize(text: str = None) -> str:
     words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
 
     if len(words_lem) < 3:
-        return 9999
+        return '9999'
     else:
         return ' '.join(words_lem)

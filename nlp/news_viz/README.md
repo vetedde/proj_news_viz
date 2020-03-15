@@ -18,7 +18,8 @@ news_viz
 │   └── leanedNames.py 
 │
 ├── visualization
-│   └── visualize.py
+│   ├── visualize.py
+│   └── plot_frequency.py
 │
 └── README.md
 ```

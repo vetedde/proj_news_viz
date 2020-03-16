@@ -44,7 +44,8 @@ def clean_text(text: str = None) -> str:
 
     text = text.lower()
     text = re.sub(r'[^а-яА-Я\-]+', ' ', text)  # leave the Cyrillic alphabet
-    text = re.sub(r'(?<!\S).(?!\S)\s*', '', text)  # remove the single characters
+    # remove the single characters
+    text = re.sub(r'(?<!\S).(?!\S)\s*', '', text)
     text = re.sub(r'\s+', ' ', text).strip()  # remove the long blanks
 
     if len(text) < 3:
@@ -94,7 +95,8 @@ def lemmatize(text: str = None) -> str:
     # in this case it's normal approach because we hard cleaned text
     list_tokens = text.split(' ')
 
-    words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
+    words_lem = [get_morph4token(token)
+                 for token in list_tokens if token not in stopwords]
 
     if len(words_lem) < 3:
         return '9999'

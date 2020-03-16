@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def plot_frequency_words(vocab: list = None, top_words: int = 30, plt_background: str = None) -> None:
+def plotFrequencyWords(vocab: list = None, top_words: int = 30, plt_background: str = None) -> None:
     """
     plot token frequency
     Parameters

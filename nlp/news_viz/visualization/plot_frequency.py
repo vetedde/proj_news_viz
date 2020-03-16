@@ -13,8 +13,9 @@ def plotFrequencyWords(vocab: list = None,
             like `[('на', 1330966), ... ]`
         top_words: int (defauld = 30)
             enter top words to plot
-        plt_background : str (default = None)
+        plt_background : str {'dark'} (default = None)
             background stale for matplotlib.pyplot.plt
+            
     """
 
     if plt_background == "dark":

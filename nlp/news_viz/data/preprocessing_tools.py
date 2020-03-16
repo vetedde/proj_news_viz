@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pymorphy2
 
-PATH = Path('/home/vtrokhymenko/git/proj_news_viz/nlp/')
+PATH = Path('../..')
 sys.path.append(str(PATH))
 
 morph = pymorphy2.MorphAnalyzer()

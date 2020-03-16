@@ -1,5 +1,4 @@
-news_viz
---------
+## news_viz
 
 source code for use in this project
 
@@ -15,7 +14,7 @@ news_viz
 │       └──  gensim.py
 │
 ├── ner
-│   └── leanedNames.py 
+│   └── leanedNames.py
 │
 ├── visualization
 │   ├── visualize.py

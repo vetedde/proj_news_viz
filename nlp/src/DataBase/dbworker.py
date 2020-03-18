@@ -1,12 +1,11 @@
 import configparser
 import os
 import time
-from datetime import datetime
+
 from uuid import uuid4
 
-from dbconnector import UseDatabase
-from dbconnector import UseDatabaseCusror
 # Коннектор к базе данных
+from dbconnector import UseDatabase
 
 
 class Dbwriter(object):
@@ -38,7 +37,7 @@ class Dbwriter(object):
 
         # database connect
         config = configparser.ConfigParser()
-        config.read("../../../config/db.ini")
+        config.read("../../config/db.ini")
 
         dbconfig = {
             "host": config["dev"]["host"],
@@ -101,7 +100,83 @@ class Dbwriter(object):
         ]
 
 
-class Dbreader:
+class DataBaseCorpusReader(object):
     """Читает данные из базы"""
+    def __init__(self):
+        # database connect
+        config = configparser.ConfigParser()
+        config.read("../../config/db.ini")
 
-    # todo
+        self.dbconfig = {
+            "host": config["dev"]["host"],
+            "dbname": config["dev"]["db"],
+            "user": config["dev"]["user"],
+            "password": config["dev"]["password"],
+        }
+
+    def get_news_source_raw(self):
+        """
+        Выводит все источники данных, которые есть в базе, в схеме сырых данных, с целью
+        дальнейшего использования
+        """
+
+        with UseDatabase(self.dbconfig) as cursor:
+            sql = """SELECT id_news_source, "name" FROM raw_data.news_source;"""
+
+            cursor.execute(sql, )
+            query_results = cursor.fetchall()
+
+            for news_source in query_results:
+                yield news_source
+
+    def get_news_text_raw(self, source=None):
+        """
+        Выводит все новости со всеми полями, которые есть в базе, в схеме сырых данных, с целью
+        дальнейшего использования, либо по конкретному идентификатору источника
+
+        Параметры:
+        source - идентификатор источника данных, полученный get_news_source_raw
+        """
+        with UseDatabase(self.dbconfig) as cursor:
+            if source is None :
+                sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text", 
+                         reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, "views", 
+                         comm_count, created_date, modified_date, batch_date 
+                         FROM raw_data.raw_data"""
+                cursor.execute(sql, )
+            else:
+                sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text", 
+                                     reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, 
+                                     "views", comm_count, created_date, modified_date, batch_date 
+                                     FROM raw_data.raw_data
+                                     WHERE id_news_source= %s"""
+                cursor.execute(sql, (source, ))
+
+            query_results = cursor.fetchall()
+
+            for text in query_results:
+                yield text
+
+    def get_news_only_text_raw(self, source=None):
+        """
+        Выводит все новости, но только их тексты, которые есть в базе, в схеме сырых данных, с целью
+        дальнейшего использования, либо по конкретному идентифакатору источника
+
+        Параметры:
+        source - идентификатор источника данных, полученный get_news_source_raw
+        """
+        with UseDatabase(self.dbconfig) as cursor:
+            if source is None :
+                sql = """SELECT "text" 
+                         FROM raw_data.raw_data"""
+                cursor.execute(sql, )
+            else:
+                sql = """SELECT "text"
+                         FROM raw_data.raw_data
+                         WHERE id_news_source= %s"""
+                cursor.execute(sql, (source, ))
+
+            query_results = cursor.fetchall()
+
+            for text in query_results:
+                yield text

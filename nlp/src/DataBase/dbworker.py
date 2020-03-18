@@ -1,11 +1,10 @@
 import configparser
 import os
 import time
-
 from uuid import uuid4
 
-# Коннектор к базе данных
 from dbconnector import UseDatabase
+# Коннектор к базе данных
 
 
 class Dbwriter(object):

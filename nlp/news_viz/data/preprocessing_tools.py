@@ -49,7 +49,7 @@ def clean_text(text: str = None) -> str:
     text = re.sub(r"\s+", " ", text).strip()  # remove the long blanks
 
     if len(text) < 3:
-        return "9999"
+        return "TOREMOVE"
     else:
         return text
 
@@ -101,6 +101,6 @@ def lemmatize(text: str = None) -> str:
     ]
 
     if len(words_lem) < 3:
-        return "9999"
+        return "TOREMOVE"
     else:
         return " ".join(words_lem)

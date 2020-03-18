@@ -102,6 +102,7 @@ class Dbwriter(object):
 
 class DataBaseCorpusReader(object):
     """Читает данные из базы"""
+
     def __init__(self):
         # database connect
         config = configparser.ConfigParser()
@@ -138,7 +139,7 @@ class DataBaseCorpusReader(object):
         source - идентификатор источника данных, полученный get_news_source_raw
         """
         with UseDatabase(self.dbconfig) as cursor:
-            if source is None :
+            if source is None:
                 sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text", 
                          reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, "views", 
                          comm_count, created_date, modified_date, batch_date 
@@ -166,7 +167,7 @@ class DataBaseCorpusReader(object):
         source - идентификатор источника данных, полученный get_news_source_raw
         """
         with UseDatabase(self.dbconfig) as cursor:
-            if source is None :
+            if source is None:
                 sql = """SELECT "text" 
                          FROM raw_data.raw_data"""
                 cursor.execute(sql, )

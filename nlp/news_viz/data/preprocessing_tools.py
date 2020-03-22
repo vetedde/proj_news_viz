@@ -16,9 +16,10 @@ try:
     with open(PATH / "data/features/stopwords_ru.txt", "r") as file:
         stopwords = file.read().splitlines()
 except FileNotFoundError:
+    print("can't load /data/features/stopwords_ru.txt")
     stopwords = []
 
-# create cache
+# for cache
 cache = {}
 
 
@@ -49,7 +50,7 @@ def clean_text(text: str = None) -> str:
     text = re.sub(r"\s+", " ", text).strip()  # remove the long blanks
 
     if len(text) < 3:
-        return "TOREMOVE"
+        return "TOREMOVE_if_len_text<3"
     else:
         return text
 
@@ -101,6 +102,6 @@ def lemmatize(text: str = None) -> str:
     ]
 
     if len(words_lem) < 3:
-        return "TOREMOVE"
+        return "TOREMOVE_if_words_lem_text<3"
     else:
         return " ".join(words_lem)
